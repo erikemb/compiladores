@@ -8,7 +8,7 @@ tokens = (
     'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN',  # Identificadores e palavras-chave
     'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',     # Operadores de comparação
     'E', 'OU', 'NAO',                         # Operadores lógicos
-    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA',  # Caracteres especiais
+    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA','PIPE',  # Caracteres especiais
 )
 
 # Palavras reservadas
@@ -20,7 +20,8 @@ reservadas = {
     'Case': 'CASE',
     'not' : 'NAO',
     'Int' : 'INT',
-    'Char' : 'CHAR'
+    'Char' : 'CHAR',
+    'otherwise ' : 'OTHERWISE'
 }
 
 # Definição de tokens para comentários
@@ -77,6 +78,7 @@ t_NOVA_LINHA = r'\n'
 t_ASPAS_SIMPLES = r'\''
 t_ASPAS_DUPLAS = r'\"'
 t_BARRA = r'\\'
+t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
 
 # Definição de tokens para identificadores e palavras-chave
 def t_ID(t):
@@ -105,4 +107,6 @@ analisador.input(codigo_teste)
 
 # Impressão dos tokens gerados
 for token in analisador:
-    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {token.lexpos}")
+    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}")
+
+# , Posição: {token.lexpos}
