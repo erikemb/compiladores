@@ -1,14 +1,30 @@
 import ply.lex as lex
 
+DEBUGLEX = True
+BLOCO = False   # erro de implementação
+
+pilha_indentacao = [0]  # Definição de pilha de indentação
+TAB_TAMANHO = 8  # Defina o tamanho da tabulação como 8 espaços
+
+# Variável global para controlar o início de linha e a detecção do primeiro token
+inicio_linha = True
+primeiro_token_detectado = False
+
 # Definição dos tokens
 tokens = (
-    'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  # Tipos de dados
-    'PLUS', 'MINUS', 'MULT', 'DIV',            # Operadores
-    'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO', # Operadores e símbolos
-    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN',  # Identificadores e palavras-chave
-    'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',     # Operadores de comparação
-    'E', 'OU', 'NAO',                         # Operadores lógicos
-    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA','PIPE',  # Caracteres especiais
+    'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  
+    'PLUS', 'MINUS', 'MULT', 'DIV',            
+    'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
+    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE'
+    'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',      
+    'E', 'OU', 'NAO',                         
+    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA', 'PIPE',
+    'ABREBLOCO', 'FECHABLOCO', 
+    'EXCLAMACAO', 'HASH', 'DOLLAR', 'PERCENT', 'ECOMERCIAL', 
+    'ESTRELA', 'PONTO', 'MAIOR',
+    'INTERROGACAO', 'ARROBA',  'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
+    'DEFAULT','OF','IN', 'BARRA_INVERTIDA', 
+     'SETAS_ESQUERDA', 'SETAS_DUPLO', 'VARSYM'
 )
 
 # Palavras reservadas
@@ -18,16 +34,65 @@ reservadas = {
     'then': 'THEN',
     'If': 'IF',
     'Case': 'CASE',
-    'not' : 'NAO',
-    'Int' : 'INT',
-    'Char' : 'CHAR',
-    'otherwise ' : 'OTHERWISE'
+    'not': 'NAO',
+    'of': 'OF',
+    'Int': 'INT',
+    'Char': 'CHAR',
+    'String': 'STRING',
+    'Float': 'FLOAT',
+    'Bool': 'BOOL',
+    'default': 'DEFAULT',
+    'in' : 'IN',
+    'where' : 'WHERE'
 }
+
+# Função para lidar com indentação no início de linhas
+
+def t_ESPACOS(t):
+    r'[ \t]+'
+    global inicio_linha, primeiro_token_detectado  #ERRO NESSES CARAI AKI
+    if BLOCO:
+        if inicio_linha:  # Só analisa a indentação no início da linha
+            nivel_indentacao = 0
+            for char in t.value:
+                if char == '\t':
+                    nivel_indentacao += TAB_TAMANHO
+                else:
+                    nivel_indentacao += 1
+
+            if primeiro_token_detectado:
+                # Verifica se a indentação aumentou ou diminuiu
+                if nivel_indentacao > pilha_indentacao[-1]:
+                    pilha_indentacao.append(nivel_indentacao)
+                    t.type = 'ABREBLOCO'
+                    if DEBUGLEX:
+                        print("Token ABREBLOCO detectado.")
+                    return t
+                elif nivel_indentacao < pilha_indentacao[-1]:
+                    while pilha_indentacao and pilha_indentacao[-1] > nivel_indentacao:
+                        pilha_indentacao.pop()
+                        t.type = 'FECHABLOCO'
+                        if DEBUGLEX:
+                            print("Token FECHABLOCO detectado.")
+                        return t
+            else:
+                # Ajusta o controle de linha para que a análise de indentação ocorra após o primeiro token
+                primeiro_token_detectado = True
+        t.lexer.lineno += len(t.value.splitlines())
+        inicio_linha = False  # Após processar a indentação, não estamos mais no início da linha
 
 # Definição de tokens para comentários
 def t_COMENTARIO(t):
     r'\-\-.*'
+    if DEBUGLEX:
+        print("Comentário:" + t.value)
     pass  # Ignora o resto da linha
+
+# Definição de tokens para strings (entre aspas duplas)
+def t_STRING(t):
+    r'\"([^\\\n]|(\\.))*?\"'
+    t.value = t.value[1:-1]  # Remove as aspas duplas
+    return t
 
 # Definição de tokens para números inteiros
 def t_INT(t):
@@ -35,10 +100,13 @@ def t_INT(t):
     t.value = int(t.value)
     return t
 
-# Define a rule so we can track line numbers
+# Define uma regra para contar saltos de linha
 def t_newline(t):
     r'\n+'
     t.lexer.lineno += len(t.value)
+    global inicio_linha
+    inicio_linha = True  # Sinaliza que estamos no início de uma nova linha
+    print()
 
 # Definição de tokens para números de ponto flutuante
 def t_FLOAT(t):
@@ -58,6 +126,22 @@ t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_DOIS_PONTOS_DUPLO = r'::'
 t_SETAS = r'->'
+t_EXCLAMACAO = r'\!'     
+t_HASH = r'\#'           
+t_DOLLAR = r'\$'         
+t_PERCENT = r'%'         
+t_ECOMERCIAL = r'\&'     
+t_ESTRELA = r'\⋆'        
+t_PONTO = r'\.'                    
+t_INTERROGACAO = r'\?'   
+t_ARROBA = r'\@'         
+t_BARRA_INVERTIDA = r'\\'  
+t_CIRCUNFLEXO = r'\^'    
+t_TIL = r'\~'            
+t_DOIS_PONTOS = r'\:'    
+t_SETAS_ESQUERDA = r'<-'
+t_SETAS_DUPLO = r'=>'
+
 
 # Definição de tokens para operadores de comparação
 t_MAIOR = r'>'
@@ -75,10 +159,15 @@ t_NAO = r'not'
 # Definição de tokens para caracteres especiais
 t_TABULACAO = r'\t'
 t_NOVA_LINHA = r'\n'
-t_ASPAS_SIMPLES = r'\''
+t_ASPAS_SIMPLES = r'\''  # Correção de aspas simples
 t_ASPAS_DUPLAS = r'\"'
 t_BARRA = r'\\'
 t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
+
+
+# Definição de VARSYM ( symbol⟨:⟩ {symbol} )⟨reservedop | dashes⟩
+t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(==|<=|>=|->|<-|=>|--)'
+
 
 # Definição de tokens para identificadores e palavras-chave
 def t_ID(t):
@@ -86,13 +175,17 @@ def t_ID(t):
     t.type = reservadas.get(t.value, 'ID')  # Verifica se é uma palavra reservada
     return t
 
-# Ignora espaços e tabulações
-t_ignore = ' \t'
-
 # Função para tratar erros léxicos
 def t_error(t):
     print(f"Erro léxico na linha {t.lineno}, caractere '{t.value[0]}'")
     t.lexer.skip(1)  # Pula o caractere desconhecido
+
+def calcular_coluna(lexpos, codigo):
+    ultima_nova_linha = codigo.rfind('\n', 0, lexpos)
+    if ultima_nova_linha < 0:
+        return lexpos + 1
+    else:
+        return lexpos - ultima_nova_linha
 
 # Criar o analisador léxico
 analisador = lex.lex()
@@ -102,11 +195,10 @@ arquivo = 'teste.hs'
 with open(arquivo, 'r') as file:
     codigo_teste = file.read()
 
-# Processar o código lido
+# Configurar o analisador
 analisador.input(codigo_teste)
 
 # Impressão dos tokens gerados
 for token in analisador:
-    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}")
-
-# , Posição: {token.lexpos}
+    coluna = calcular_coluna(token.lexpos, codigo_teste)
+    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
