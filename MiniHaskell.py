@@ -15,16 +15,16 @@ tokens = (
     'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  
     'PLUS', 'MINUS', 'MULT', 'DIV',            
     'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
-    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE'
+    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE',
     'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',      
     'E', 'OU', 'NAO',                         
     'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA', 'PIPE',
     'ABREBLOCO', 'FECHABLOCO', 
     'EXCLAMACAO', 'HASH', 'DOLLAR', 'PERCENT', 'ECOMERCIAL', 
     'ESTRELA', 'PONTO', 'MAIOR',
-    'INTERROGACAO', 'ARROBA',  'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
-    'DEFAULT','OF','IN', 'BARRA_INVERTIDA', 
-     'SETAS_ESQUERDA', 'SETAS_DUPLO', 'VARSYM'
+    'INTERROGACAO', 'ARROBA', 'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
+    'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', 
+    'SETAS_ESQUERDA', 'SETAS_DUPLO', 'VARSYM'
 )
 
 # Palavras reservadas
@@ -42,15 +42,14 @@ reservadas = {
     'Float': 'FLOAT',
     'Bool': 'BOOL',
     'default': 'DEFAULT',
-    'in' : 'IN',
-    'where' : 'WHERE'
+    'in': 'IN',
+    'where': 'WHERE'
 }
 
 # Função para lidar com indentação no início de linhas
-
 def t_ESPACOS(t):
     r'[ \t]+'
-    global inicio_linha, primeiro_token_detectado  #ERRO NESSES CARAI AKI
+    global inicio_linha, primeiro_token_detectado
     if BLOCO:
         if inicio_linha:  # Só analisa a indentação no início da linha
             nivel_indentacao = 0
@@ -114,14 +113,18 @@ def t_FLOAT(t):
     t.value = float(t.value)
     return t
 
-# Definição de tokens para operadores
+# Definição de tokens para char
+def t_CHAR(t):
+    r'\'\s*(?:\\.|[^\'\\])\s*\''
+    t.value = t.value[1:-1]  # Remove as aspas simples
+    return t
+
+# Definição de tokens para operadores e símbolos
 t_PLUS = r'\+'
 t_MINUS = r'-'
 t_MULT = r'\*'
 t_DIV = r'/'
 t_EQUALS = r'='
-
-# Definição de tokens para símbolos
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_DOIS_PONTOS_DUPLO = r'::'
@@ -141,7 +144,6 @@ t_TIL = r'\~'
 t_DOIS_PONTOS = r'\:'    
 t_SETAS_ESQUERDA = r'<-'
 t_SETAS_DUPLO = r'=>'
-
 
 # Definição de tokens para operadores de comparação
 t_MAIOR = r'>'
@@ -164,9 +166,8 @@ t_ASPAS_DUPLAS = r'\"'
 t_BARRA = r'\\'
 t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
 
-
-# Definição de VARSYM ( symbol⟨:⟩ {symbol} )⟨reservedop | dashes⟩
-t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(==|<=|>=|->|<-|=>|--)'
+# Definição de VARSYM (symbol⟨:⟩ {symbol})⟨reservedop | dashes⟩
+t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(?:::|==|<=|>=|->|<-|=>|@|~|\\|\||:|=|--|\.\.)'
 
 
 # Definição de tokens para identificadores e palavras-chave
