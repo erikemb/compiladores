@@ -1,0 +1,21 @@
+[x]add leitura de string
+[]leitura de espaços iniciais ABREBLOCO FECHABLOCO
+[x]criar pilha de espaços iniciais 
+[]add valores aos token                 # FAZER POR ULTIMO
+[]add restante da gramatica 
+[x]ADD 'UNDERLINE'
+[x]CORRIGIR A QUESTAO DA COLUNA NA LINHA 
+[x]CRIAR UM PAR ASPAS DAS ASPAS
+[x]ADD ' EM VARIAVEIS ( id)
+[] ver esse guard que vinicius falou
+[] corrigir o varsyn , n pode começar com : e não pode terminar com dot reservado e nem  -- 
+[] implemtantar gap ele ingnora espaços e saltos delinha  entre / / 
+[] comentario em bloco fazer {- -}
+[]add isso decimal octal hexadecimal
+[] a string ""casa""   string id string
+[] ver quando o documento finaliza e desempilhar tudo ate zero 
+
+
+PARTE 3 
+
+ADD FLOAT NA SEGUNDA PARTE

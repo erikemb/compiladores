@@ -1,0 +1,493 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    ABREBLOCO
+    ARROBA
+    ASPAS_DUPLAS
+    ASPAS_SIMPLES
+    BARRA
+    BARRA_INVERTIDA
+    BOOL
+    CASE
+    CHAR
+    CIRCUNFLEXO
+    COMENTARIO
+    CRASE
+    DEFAULT
+    DIFERENTE
+    DOIS_PONTOS
+    DOIS_PONTOS_DUPLO
+    DOLLAR
+    ECOMERCIAL
+    ELSE
+    EQUALS
+    ESTRELA
+    EXCLAMACAO
+    FECHABLOCO
+    FLOAT
+    HASHTAG
+    ID
+    IF
+    IGUAL
+    IN
+    INTERROGACAO
+    LCHAVE
+    LCOLCHETE
+    LET
+    LPAREN
+    MAIOR
+    MAIOR_IGUAL
+    MENOR
+    MENOR_IGUAL
+    NOVA_LINHA
+    OF
+    PERCENT
+    PIPE
+    PONTO
+    PONTO_VIRGULA
+    RCHAVE
+    RCOLCHETE
+    RPAREN
+    SETAS
+    SETAS_DUPLO
+    SETAS_ESQUERDA
+    STRING
+    TABULACAO
+    THEN
+    TIL
+    VARSYM
+    WHERE
+
+Grammar
+
+Rule 0     S' -> expressao
+Rule 1     expressao -> expressao PLUS termo
+Rule 2     expressao -> expressao MINUS termo
+Rule 3     expressao -> termo
+Rule 4     termo -> termo MULT fator
+Rule 5     termo -> termo DIV fator
+Rule 6     termo -> fator
+Rule 7     fator -> INT
+Rule 8     fator -> ( expressao )
+Rule 9     expressao -> expressao AND termo
+Rule 10    expressao -> expressao OR termo
+Rule 11    termo -> NOT fator
+
+Terminals, with rules where they appear
+
+(                    : 8
+)                    : 8
+ABREBLOCO            : 
+AND                  : 9
+ARROBA               : 
+ASPAS_DUPLAS         : 
+ASPAS_SIMPLES        : 
+BARRA                : 
+BARRA_INVERTIDA      : 
+BOOL                 : 
+CASE                 : 
+CHAR                 : 
+CIRCUNFLEXO          : 
+COMENTARIO           : 
+CRASE                : 
+DEFAULT              : 
+DIFERENTE            : 
+DIV                  : 5
+DOIS_PONTOS          : 
+DOIS_PONTOS_DUPLO    : 
+DOLLAR               : 
+ECOMERCIAL           : 
+ELSE                 : 
+EQUALS               : 
+ESTRELA              : 
+EXCLAMACAO           : 
+FECHABLOCO           : 
+FLOAT                : 
+HASHTAG              : 
+ID                   : 
+IF                   : 
+IGUAL                : 
+IN                   : 
+INT                  : 7
+INTERROGACAO         : 
+LCHAVE               : 
+LCOLCHETE            : 
+LET                  : 
+LPAREN               : 
+MAIOR                : 
+MAIOR_IGUAL          : 
+MENOR                : 
+MENOR_IGUAL          : 
+MINUS                : 2
+MULT                 : 4
+NOT                  : 11
+NOVA_LINHA           : 
+OF                   : 
+OR                   : 10
+PERCENT              : 
+PIPE                 : 
+PLUS                 : 1
+PONTO                : 
+PONTO_VIRGULA        : 
+RCHAVE               : 
+RCOLCHETE            : 
+RPAREN               : 
+SETAS                : 
+SETAS_DUPLO          : 
+SETAS_ESQUERDA       : 
+STRING               : 
+TABULACAO            : 
+THEN                 : 
+TIL                  : 
+VARSYM               : 
+WHERE                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+expressao            : 1 2 8 9 10 0
+fator                : 4 5 6 11
+termo                : 1 2 3 4 5 9 10
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . expressao
+    (1) expressao -> . expressao PLUS termo
+    (2) expressao -> . expressao MINUS termo
+    (3) expressao -> . termo
+    (9) expressao -> . expressao AND termo
+    (10) expressao -> . expressao OR termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    expressao                      shift and go to state 1
+    termo                          shift and go to state 2
+    fator                          shift and go to state 3
+
+state 1
+
+    (0) S' -> expressao .
+    (1) expressao -> expressao . PLUS termo
+    (2) expressao -> expressao . MINUS termo
+    (9) expressao -> expressao . AND termo
+    (10) expressao -> expressao . OR termo
+
+    PLUS            shift and go to state 7
+    MINUS           shift and go to state 8
+    AND             shift and go to state 9
+    OR              shift and go to state 10
+
+
+state 2
+
+    (3) expressao -> termo .
+    (4) termo -> termo . MULT fator
+    (5) termo -> termo . DIV fator
+
+    PLUS            reduce using rule 3 (expressao -> termo .)
+    MINUS           reduce using rule 3 (expressao -> termo .)
+    AND             reduce using rule 3 (expressao -> termo .)
+    OR              reduce using rule 3 (expressao -> termo .)
+    $end            reduce using rule 3 (expressao -> termo .)
+    )               reduce using rule 3 (expressao -> termo .)
+    MULT            shift and go to state 11
+    DIV             shift and go to state 12
+
+
+state 3
+
+    (6) termo -> fator .
+
+    MULT            reduce using rule 6 (termo -> fator .)
+    DIV             reduce using rule 6 (termo -> fator .)
+    PLUS            reduce using rule 6 (termo -> fator .)
+    MINUS           reduce using rule 6 (termo -> fator .)
+    AND             reduce using rule 6 (termo -> fator .)
+    OR              reduce using rule 6 (termo -> fator .)
+    $end            reduce using rule 6 (termo -> fator .)
+    )               reduce using rule 6 (termo -> fator .)
+
+
+state 4
+
+    (11) termo -> NOT . fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    fator                          shift and go to state 13
+
+state 5
+
+    (7) fator -> INT .
+
+    MULT            reduce using rule 7 (fator -> INT .)
+    DIV             reduce using rule 7 (fator -> INT .)
+    PLUS            reduce using rule 7 (fator -> INT .)
+    MINUS           reduce using rule 7 (fator -> INT .)
+    AND             reduce using rule 7 (fator -> INT .)
+    OR              reduce using rule 7 (fator -> INT .)
+    $end            reduce using rule 7 (fator -> INT .)
+    )               reduce using rule 7 (fator -> INT .)
+
+
+state 6
+
+    (8) fator -> ( . expressao )
+    (1) expressao -> . expressao PLUS termo
+    (2) expressao -> . expressao MINUS termo
+    (3) expressao -> . termo
+    (9) expressao -> . expressao AND termo
+    (10) expressao -> . expressao OR termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    expressao                      shift and go to state 14
+    termo                          shift and go to state 2
+    fator                          shift and go to state 3
+
+state 7
+
+    (1) expressao -> expressao PLUS . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    termo                          shift and go to state 15
+    fator                          shift and go to state 3
+
+state 8
+
+    (2) expressao -> expressao MINUS . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    termo                          shift and go to state 16
+    fator                          shift and go to state 3
+
+state 9
+
+    (9) expressao -> expressao AND . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    termo                          shift and go to state 17
+    fator                          shift and go to state 3
+
+state 10
+
+    (10) expressao -> expressao OR . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (11) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    termo                          shift and go to state 18
+    fator                          shift and go to state 3
+
+state 11
+
+    (4) termo -> termo MULT . fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    fator                          shift and go to state 19
+
+state 12
+
+    (5) termo -> termo DIV . fator
+    (7) fator -> . INT
+    (8) fator -> . ( expressao )
+
+    INT             shift and go to state 5
+    (               shift and go to state 6
+
+    fator                          shift and go to state 20
+
+state 13
+
+    (11) termo -> NOT fator .
+
+    MULT            reduce using rule 11 (termo -> NOT fator .)
+    DIV             reduce using rule 11 (termo -> NOT fator .)
+    PLUS            reduce using rule 11 (termo -> NOT fator .)
+    MINUS           reduce using rule 11 (termo -> NOT fator .)
+    AND             reduce using rule 11 (termo -> NOT fator .)
+    OR              reduce using rule 11 (termo -> NOT fator .)
+    $end            reduce using rule 11 (termo -> NOT fator .)
+    )               reduce using rule 11 (termo -> NOT fator .)
+
+
+state 14
+
+    (8) fator -> ( expressao . )
+    (1) expressao -> expressao . PLUS termo
+    (2) expressao -> expressao . MINUS termo
+    (9) expressao -> expressao . AND termo
+    (10) expressao -> expressao . OR termo
+
+    )               shift and go to state 21
+    PLUS            shift and go to state 7
+    MINUS           shift and go to state 8
+    AND             shift and go to state 9
+    OR              shift and go to state 10
+
+
+state 15
+
+    (1) expressao -> expressao PLUS termo .
+    (4) termo -> termo . MULT fator
+    (5) termo -> termo . DIV fator
+
+    PLUS            reduce using rule 1 (expressao -> expressao PLUS termo .)
+    MINUS           reduce using rule 1 (expressao -> expressao PLUS termo .)
+    AND             reduce using rule 1 (expressao -> expressao PLUS termo .)
+    OR              reduce using rule 1 (expressao -> expressao PLUS termo .)
+    $end            reduce using rule 1 (expressao -> expressao PLUS termo .)
+    )               reduce using rule 1 (expressao -> expressao PLUS termo .)
+    MULT            shift and go to state 11
+    DIV             shift and go to state 12
+
+
+state 16
+
+    (2) expressao -> expressao MINUS termo .
+    (4) termo -> termo . MULT fator
+    (5) termo -> termo . DIV fator
+
+    PLUS            reduce using rule 2 (expressao -> expressao MINUS termo .)
+    MINUS           reduce using rule 2 (expressao -> expressao MINUS termo .)
+    AND             reduce using rule 2 (expressao -> expressao MINUS termo .)
+    OR              reduce using rule 2 (expressao -> expressao MINUS termo .)
+    $end            reduce using rule 2 (expressao -> expressao MINUS termo .)
+    )               reduce using rule 2 (expressao -> expressao MINUS termo .)
+    MULT            shift and go to state 11
+    DIV             shift and go to state 12
+
+
+state 17
+
+    (9) expressao -> expressao AND termo .
+    (4) termo -> termo . MULT fator
+    (5) termo -> termo . DIV fator
+
+    PLUS            reduce using rule 9 (expressao -> expressao AND termo .)
+    MINUS           reduce using rule 9 (expressao -> expressao AND termo .)
+    AND             reduce using rule 9 (expressao -> expressao AND termo .)
+    OR              reduce using rule 9 (expressao -> expressao AND termo .)
+    $end            reduce using rule 9 (expressao -> expressao AND termo .)
+    )               reduce using rule 9 (expressao -> expressao AND termo .)
+    MULT            shift and go to state 11
+    DIV             shift and go to state 12
+
+
+state 18
+
+    (10) expressao -> expressao OR termo .
+    (4) termo -> termo . MULT fator
+    (5) termo -> termo . DIV fator
+
+    PLUS            reduce using rule 10 (expressao -> expressao OR termo .)
+    MINUS           reduce using rule 10 (expressao -> expressao OR termo .)
+    AND             reduce using rule 10 (expressao -> expressao OR termo .)
+    OR              reduce using rule 10 (expressao -> expressao OR termo .)
+    $end            reduce using rule 10 (expressao -> expressao OR termo .)
+    )               reduce using rule 10 (expressao -> expressao OR termo .)
+    MULT            shift and go to state 11
+    DIV             shift and go to state 12
+
+
+state 19
+
+    (4) termo -> termo MULT fator .
+
+    MULT            reduce using rule 4 (termo -> termo MULT fator .)
+    DIV             reduce using rule 4 (termo -> termo MULT fator .)
+    PLUS            reduce using rule 4 (termo -> termo MULT fator .)
+    MINUS           reduce using rule 4 (termo -> termo MULT fator .)
+    AND             reduce using rule 4 (termo -> termo MULT fator .)
+    OR              reduce using rule 4 (termo -> termo MULT fator .)
+    $end            reduce using rule 4 (termo -> termo MULT fator .)
+    )               reduce using rule 4 (termo -> termo MULT fator .)
+
+
+state 20
+
+    (5) termo -> termo DIV fator .
+
+    MULT            reduce using rule 5 (termo -> termo DIV fator .)
+    DIV             reduce using rule 5 (termo -> termo DIV fator .)
+    PLUS            reduce using rule 5 (termo -> termo DIV fator .)
+    MINUS           reduce using rule 5 (termo -> termo DIV fator .)
+    AND             reduce using rule 5 (termo -> termo DIV fator .)
+    OR              reduce using rule 5 (termo -> termo DIV fator .)
+    $end            reduce using rule 5 (termo -> termo DIV fator .)
+    )               reduce using rule 5 (termo -> termo DIV fator .)
+
+
+state 21
+
+    (8) fator -> ( expressao ) .
+
+    MULT            reduce using rule 8 (fator -> ( expressao ) .)
+    DIV             reduce using rule 8 (fator -> ( expressao ) .)
+    PLUS            reduce using rule 8 (fator -> ( expressao ) .)
+    MINUS           reduce using rule 8 (fator -> ( expressao ) .)
+    AND             reduce using rule 8 (fator -> ( expressao ) .)
+    OR              reduce using rule 8 (fator -> ( expressao ) .)
+    $end            reduce using rule 8 (fator -> ( expressao ) .)
+    )               reduce using rule 8 (fator -> ( expressao ) .)
+
