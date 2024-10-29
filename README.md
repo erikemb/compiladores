@@ -1,14 +1,17 @@
-# compiladores
-Atividades da Disciplina Compiladores
+Compilador (Análise Léxica e Sintática) para a linguagem do Jogo da Cobrinha. 
 
-implementação o analisador léxico e analisador sintático 
+Desenvolvido na Linguagem de Programação Python, sendo o TkInter a biblioteca para a interface gráfica do compilador.
 
+Atividade referente a disciplina de Compiladores do Sétimo período do Curso de Ciência da Computação pelo IFSULDEMINAS, Campus Muzambinho.
 
+O algoritmo foi feito em um ambiente virtual pelo PyCharm. Neste arquivo estão:
 
+    * o arquivo main.py - o compilador
+    * parser.out e parsetab.py são gerados pela biblioteca PLY e não devem ser alterados.
+    * codigoteste.txt, um código para teste do compilador mesmo
 
+Os vídeos para explicação podem ser encontrados pelos links: https://www.youtube.com/watch?v=A35SigWZyqo&t=185s e https://www.youtube.com/watch?v=-XP8EhOnhgY 
 
-ref
+Qualquer dúvida... estou a disposição!
 
-https://www.dabeaz.com/ply/ply.html#ply_nn3
-
-https://www.haskell.org/onlinereport/haskell2010/haskellch10.html
+Bons estudos :)

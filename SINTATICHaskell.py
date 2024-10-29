@@ -17,7 +17,14 @@ class Node:
 
     def avaliar(self):
     # Verifica o tipo do nó e realiza a operação correspondente
-        if self.tipo == 'Numero':
+        
+        
+        if self.tipo == 'Variavel':
+            # Verifica se a variável existe no dicionário `variaveis`
+            return variaveis.get(self.valor, 0)  # Retorna o valor ou 0 se não existir
+        if self.tipo == 'numero':
+            return self.valor
+        if self.tipo == 'id':
             return self.valor
         # elif self.tipo == 'Bool':
         #     return self.valor  # Retorna o valor booleano diretamente
@@ -84,10 +91,14 @@ def p_termo_fator(p):
     '''termo : fator'''
     p[0] = p[1]
 
-def p_fator_numero(p):
+def p_fator_id(p):
     '''fator : INT
-             | FLOAT'''
-    p[0] = Node(tipo='Numero', valor=p[1])
+             | FLOAT
+             | STRING
+             | BOOL
+             | CHAR
+             '''
+    p[0] = Node(tipo='numero', valor=p[1])
 
 
 def p_fator_parenteses(p):
@@ -123,15 +134,56 @@ def p_expressao_relacional(p):
 #     valor = True if p[1] == 'True' else False
 #     p[0] = Node(tipo='Booleano', valor=valor)
 
+def p_declaracao_valor(p):
+    '''
+    declaracao_valor : ID IGUAL valor
+    '''
+    variavel = p[1]
+    valor = p[3]
+    p[0] = ('declaracao_valor', variavel, valor)
+
+def p_declaracao_tipo(p):
+    '''
+    declaracao_tipo : ID DOIS_PONTOS_DUPLO TIPO
+    '''
+    variavel = p[1]
+    tipo = p[3]
+    p[0] = ('declaracao_tipo', variavel, tipo)
+
+def p_tipo(p):
+    '''
+    valor : INT
+          | FLOAT
+          | STRING
+          | BOOL
+          | CHAR
+    '''
+    p[0] = p[1]
+
+# def p_identificador(p):
+#     '''
+#     identificador : ID
+#     '''
+#     p[0] = p[1]
+
+# def p_id(p):
+#     '''
+#     id : ID
+#     '''
+#     p[0] = Node('Variavel', valor=p[1])
 
 
 
 
 
 
+
+erros = 0
+errossintaticos = []
 def p_error(p):
     if p:
         print(f"Erro de sintaxe no token {p.type} na linha {p.lineno}")
+        
     else:
         print("Erro de sintaxe no final do arquivo")
 
@@ -171,3 +223,4 @@ print(ast)
 # Avalia a expressão
 resultado = ast.avaliar()
 print("Resultado da Expressão:", resultado)
+print("quantidade de erros encontrada é :", erros)
