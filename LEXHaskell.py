@@ -169,7 +169,7 @@ t_RCHAVE = r'\}'
 t_MAIOR = r'>'
 t_MAIOR_IGUAL = r'>='
 t_IGUAL = r'=='
-t_DIFERENTE = r'/='
+t_DIFERENTE = r'!='
 t_MENOR_IGUAL = r'<='
 t_MENOR = r'<'
 
@@ -187,7 +187,10 @@ t_BARRA = r'\\'
 t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
 
 # Definição de VARSYM (symbol⟨:⟩ {symbol})⟨reservedop | dashes⟩
-t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(?:::|==|<=|>=|->|<-|=>|@|~|\\|\||:|=|--|\.\.)'
+# t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(?:::|==|<=|>=|->|<-|=>|@|~|\\|\||:|=|--|\.\.)'
+
+
+# ARRUMAR O VARSYN PQ TA ZOADO
 
 
 

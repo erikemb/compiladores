@@ -1,6 +1,8 @@
 import ply.yacc as yacc
 from LEXHaskell import tokens  # Importar os tokens do analisador léxico
 
+variaveis = {}
+
 class Node:
     def __init__(self, tipo, valor=None, filhos=None):
         self.tipo = tipo
@@ -14,9 +16,13 @@ class Node:
         return ret
 
     def avaliar(self):
-        # Verifica o tipo do nó e realiza a operação correspondente
+    # Verifica o tipo do nó e realiza a operação correspondente
         if self.tipo == 'Numero':
             return self.valor
+        # elif self.tipo == 'Bool':
+        #     return self.valor  # Retorna o valor booleano diretamente
+        elif self.tipo == 'Variavel':
+            return variaveis.get(self.valor, 0)
         elif self.tipo == 'Operacao':
             left = self.filhos[0].avaliar()
             right = self.filhos[1].avaliar()
@@ -36,8 +42,24 @@ class Node:
             elif self.valor == 'or':
                 return left or right
         elif self.tipo == 'OperacaoUnaria':
-            # Avaliação para o operador NOT
             return not self.filhos[0].avaliar()
+        elif self.tipo == 'OperacaoRelacional':
+            left = self.filhos[0].avaliar()
+            right = self.filhos[1].avaliar()
+            if self.valor == '==':
+                return left == right
+            elif self.valor == '!=':
+                return left != right
+            elif self.valor == '<':
+                return left < right
+            elif self.valor == '>':
+                return left > right
+            elif self.valor == '<=':
+                return left <= right
+            elif self.valor == '>=':
+                return left >= right
+
+        
 
 ################################################################################3
 
@@ -67,6 +89,7 @@ def p_fator_numero(p):
              | FLOAT'''
     p[0] = Node(tipo='Numero', valor=p[1])
 
+
 def p_fator_parenteses(p):
     '''fator : LPAREN expressao RPAREN'''
     p[0] = p[2]
@@ -83,6 +106,26 @@ def p_expressao_booleana_binaria(p):
 def p_termo_booleana_unario(p):
     '''termo : NOT fator'''
     p[0] = Node(tipo='OperacaoUnaria', valor='NOT', filhos=[p[2]])
+
+def p_expressao_relacional(p):
+    '''expressao : expressao IGUAL termo
+                 | expressao DIFERENTE termo
+                 | expressao MENOR termo
+                 | expressao MAIOR termo
+                 | expressao MENOR_IGUAL termo
+                 | expressao MAIOR_IGUAL termo'''
+    p[0] = Node(tipo='OperacaoRelacional', valor=p[2], filhos=[p[1], p[3]])
+
+# def p_fator_booleano(p):
+#     '''fator : TRUE
+#              | FALSE'''
+#     # Converta `TRUE` e `FALSE` para valores booleanos em Python
+#     valor = True if p[1] == 'True' else False
+#     p[0] = Node(tipo='Booleano', valor=valor)
+
+
+
+
 
 
 
