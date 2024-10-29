@@ -1,0 +1,69 @@
+import java_cup.runtime.*;
+
+/* Preliminaries to set up and use the scanner.  */
+init with {: scanner.init();              :};
+scan with {: return scanner.next_token(); :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal     OPENCHAVE, CLOSECHAVE, PONTO_VIRGULA
+
+/* Non-terminals */
+non terminal cname, var, decls, gendecl, funlhs, pat, rhs
+non terminal cdecls, gendecl, idecls, idecl, vars, type, btype
+non terminal atype, tyvar
+
+/* Precedences */
+precedence 
+
+/* The grammar */
+cname ::= var
+
+decls ::= OPENCHAVE  decls
+		| decl PONTO_VIRGULA decls
+		| decl decls
+		| CLOSECHAVE
+
+decl ::= gendecl
+  		| funlhs rhs 
+		| pat rhs
+
+cdecls ::= OPENCHAVE  cdecls
+		| cdecl PONTO_VIRGULA cdecls
+		| cdecl cdecls
+		| CLOSECHAVE
+
+cdecl ::= gendecl
+
+idecls ::= OPENCHAVE  idecls
+		| idecl PONTO_VIRGULA idecls
+		| idecl idecls
+		| CLOSECHAVE
+
+idecl ::= funlhs rhs 
+		| var rhs 
+		|		    
+
+gendecl ::= vars DOISPONTOSDUPLO type	    
+		|	
+   
+vars ::= var VIRGULA vars
+		| var
+
+type ::= btype
+		| btype ARROWRIGHT type
+
+btype ::= btype atype
+		| atype
+
+atype ::= gtycon
+		| tyvar
+		| PARENTESE_ESQUERDA atype
+		| type VIRGULA atype
+		| type PARENTESE_DIREITA
+		| CHAVE_ESQUERDA type CHAVE_DIREITA	    
+
+gtycon ::= qtycon
+|	()	    (unit type)
+|	[]	    (list constructor)
+|	(->)	    (function constructor)
+|	(,{,})	    (tupling constructors)

@@ -1,205 +1,124 @@
-import ply.lex as lex
+import ply.yacc as yacc
+from LEXHaskell import tokens  # Importar os tokens do analisador léxico
 
-DEBUGLEX = True
-BLOCO = True   # erro de implementação
+class Node:
+    def __init__(self, tipo, valor=None, filhos=None):
+        self.tipo = tipo
+        self.valor = valor
+        self.filhos = filhos or []
 
-pilha_indentacao = [0]  # Definição de pilha de indentação
-TAB_TAMANHO = 8  # Defina o tamanho da tabulação como 8 espaços
+    def __repr__(self, level=0):
+        ret = "\t" * level + repr(self.tipo) + " : " + repr(self.valor) + "\n"
+        for child in self.filhos:
+            ret += child.__repr__(level + 1)
+        return ret
 
-# Variável global para controlar o início de linha e a detecção do primeiro token
-inicio_linha = True
-primeiro_token_detectado = False
+    def avaliar(self):
+        # Verifica o tipo do nó e realiza a operação correspondente
+        if self.tipo == 'Numero':
+            return self.valor
+        elif self.tipo == 'Operacao':
+            left = self.filhos[0].avaliar()
+            right = self.filhos[1].avaliar()
+            if self.valor == '+':
+                return left + right
+            elif self.valor == '-':
+                return left - right
+            elif self.valor == '*':
+                return left * right
+            elif self.valor == '/':
+                return left / right
+        elif self.tipo == 'OperacaoBooleana':
+            left = self.filhos[0].avaliar()
+            right = self.filhos[1].avaliar()
+            if self.valor == 'and':
+                return left and right
+            elif self.valor == 'or':
+                return left or right
+        elif self.tipo == 'OperacaoUnaria':
+            # Avaliação para o operador NOT
+            return not self.filhos[0].avaliar()
 
-# Definição dos tokens
-tokens = (
-    'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  
-    'PLUS', 'MINUS', 'MULT', 'DIV',            
-    'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
-    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE',
-    'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',      
-    'E', 'OU', 'NAO',                         
-    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA', 'PIPE',
-    'ABREBLOCO', 'FECHABLOCO', 
-    'EXCLAMACAO', 'HASH', 'DOLLAR', 'PERCENT', 'ECOMERCIAL', 
-    'ESTRELA', 'PONTO',
-    'INTERROGACAO', 'ARROBA', 'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
-    'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', 
-    'SETAS_ESQUERDA', 'SETAS_DUPLO', 'VARSYM'
-)
+################################################################################3
 
-# Palavras reservadas
-reservadas = {
-    'let': 'LET',
-    'else': 'ELSE',
-    'then': 'THEN',
-    'If': 'IF',
-    'Case': 'CASE',
-    'not': 'NAO',
-    'of': 'OF',
-    'Int': 'INT',
-    'Char': 'CHAR',
-    'String': 'STRING',
-    'Float': 'FLOAT',
-    'Bool': 'BOOL',
-    'default': 'DEFAULT',
-    'in': 'IN',
-    'where': 'WHERE'
-}
+# Definição das regras de produção
 
-# Função para lidar com indentação no início de linhas
-def t_ESPACOS(t):
-    r'[ \t]+'
-    global inicio_linha, primeiro_token_detectado
-    if BLOCO:
-        if inicio_linha:  # Só analisa a indentação no início da linha
-            nivel_indentacao = 0
-            for char in t.value:
-                if char == '\t':
-                    nivel_indentacao += TAB_TAMANHO
-                else:
-                    nivel_indentacao += 1
+# Regras da gramática
+def p_expressao_binaria(p):
+    '''expressao : expressao PLUS termo
+                 | expressao MINUS termo'''
+    p[0] = Node(tipo='Operacao', valor=p[2], filhos=[p[1], p[3]])
 
-            if primeiro_token_detectado:
-                # Verifica se a indentação aumentou ou diminuiu
-                if nivel_indentacao > pilha_indentacao[-1]:
-                    pilha_indentacao.append(nivel_indentacao)
-                    t.type = 'ABREBLOCO'
-                    if DEBUGLEX:
-                        print("Token ABREBLOCO detectado.")
-                    return t
-                elif nivel_indentacao < pilha_indentacao[-1]:
-                    while pilha_indentacao and pilha_indentacao[-1] > nivel_indentacao:
-                        pilha_indentacao.pop()
-                        t.type = 'FECHABLOCO'
-                        if DEBUGLEX:
-                            print("Token FECHABLOCO detectado.")
-                        return t
-            else:
-                # Ajusta o controle de linha para que a análise de indentação ocorra após o primeiro token
-                primeiro_token_detectado = True
-        t.lexer.lineno += len(t.value.splitlines())
-        inicio_linha = False  # Após processar a indentação, não estamos mais no início da linha
+def p_expressao_termo(p):
+    '''expressao : termo'''
+    p[0] = p[1]
 
-# Definição de tokens para comentários
-def t_COMENTARIO(t):
-    r'\-\-.*'
-    if DEBUGLEX:
-        print("Comentário:" + t.value)
-    pass  # Ignora o resto da linha
+def p_termo_binario(p):
+    '''termo : termo MULT fator
+             | termo DIV fator'''
+    p[0] = Node(tipo='Operacao', valor=p[2], filhos=[p[1], p[3]])
 
-# Definição de tokens para strings (entre aspas duplas)
-def t_STRING(t):
-    r'\"([^\\\n]|(\\.))*?\"'
-    t.value = t.value[1:-1]  # Remove as aspas duplas
-    return t
+def p_termo_fator(p):
+    '''termo : fator'''
+    p[0] = p[1]
 
-# Definição de tokens para números inteiros
-def t_INT(t):
-    r'\d+'
-    t.value = int(t.value)
-    return t
+def p_fator_numero(p):
+    '''fator : INT
+             | FLOAT'''
+    p[0] = Node(tipo='Numero', valor=p[1])
 
-# Define uma regra para contar saltos de linha
-def t_newline(t):
-    r'\n+'
-    t.lexer.lineno += len(t.value)
-    global inicio_linha
-    inicio_linha = True  # Sinaliza que estamos no início de uma nova linha
-    print()
+def p_fator_parenteses(p):
+    '''fator : LPAREN expressao RPAREN'''
+    p[0] = p[2]
 
-# Definição de tokens para números de ponto flutuante
-def t_FLOAT(t):
-    r'\d+\.\d+'
-    t.value = float(t.value)
-    return t
+def p_expressao_booleana_binaria(p):
+    '''expressao : expressao AND termo
+                 | expressao OR termo'''
+    p[0] = Node(tipo='OperacaoBooleana', valor=p[2], filhos=[p[1], p[3]])
 
-# Definição de tokens para char
-def t_CHAR(t):
-    r'\'\s*(?:\\.|[^\'\\])\s*\''
-    t.value = t.value[1:-1]  # Remove as aspas simples
-    return t
+def p_termo_booleana_unario(p):
+    '''termo : NOT fator'''
+    p[0] = Node(tipo='OperacaoUnaria', valor='NOT', filhos=[p[2]])
 
-# Definição de tokens para operadores e símbolos
-t_PLUS = r'\+'
-t_MINUS = r'-'
-t_MULT = r'\*'
-t_DIV = r'/'
-t_EQUALS = r'='
-t_LPAREN = r'\('
-t_RPAREN = r'\)'
-t_DOIS_PONTOS_DUPLO = r'::'
-t_SETAS = r'->'
-t_EXCLAMACAO = r'\!'     
-t_HASH = r'\#'           
-t_DOLLAR = r'\$'         
-t_PERCENT = r'%'         
-t_ECOMERCIAL = r'\&'     
-t_ESTRELA = r'\⋆'        
-t_PONTO = r'\.'                    
-t_INTERROGACAO = r'\?'   
-t_ARROBA = r'\@'         
-t_BARRA_INVERTIDA = r'\\'  
-t_CIRCUNFLEXO = r'\^'    
-t_TIL = r'\~'            
-t_DOIS_PONTOS = r'\:'    
-t_SETAS_ESQUERDA = r'<-'
-t_SETAS_DUPLO = r'=>'
-
-# Definição de tokens para operadores de comparação
-t_MAIOR = r'>'
-t_MAIOR_IGUAL = r'>='
-t_IGUAL = r'=='
-t_DIFERENTE = r'/='
-t_MENOR_IGUAL = r'<='
-t_MENOR = r'<'
-
-# Definição de tokens para operadores lógicos
-t_E = r'\&\&'
-t_OU = r'\|\|'
-t_NAO = r'not'
-
-# Definição de tokens para caracteres especiais
-t_TABULACAO = r'\t'
-t_NOVA_LINHA = r'\n'
-t_ASPAS_SIMPLES = r'\''  # Correção de aspas simples
-t_ASPAS_DUPLAS = r'\"'
-t_BARRA = r'\\'
-t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
-
-# Definição de VARSYM (symbol⟨:⟩ {symbol})⟨reservedop | dashes⟩
-t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(?:::|==|<=|>=|->|<-|=>|@|~|\\|\||:|=|--|\.\.)'
-
-
-# Definição de tokens para identificadores e palavras-chave
-def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
-    t.type = reservadas.get(t.value, 'ID')  # Verifica se é uma palavra reservada
-    return t
-
-# Função para tratar erros léxicos
-def t_error(t):
-    print(f"Erro léxico na linha {t.lineno}, caractere '{t.value[0]}'")
-    t.lexer.skip(1)  # Pula o caractere desconhecido
-
-def calcular_coluna(lexpos, codigo):
-    ultima_nova_linha = codigo.rfind('\n', 0, lexpos)
-    if ultima_nova_linha < 0:
-        return lexpos + 1
+def p_error(p):
+    if p:
+        print(f"Erro de sintaxe no token {p.type} na linha {p.lineno}")
     else:
-        return lexpos - ultima_nova_linha
+        print("Erro de sintaxe no final do arquivo")
 
-# Criar o analisador léxico
-analisador = lex.lex()
+
+##################################
+
+
+
+##################################
+
+# Construa o analisador sintático
+parser = yacc.yacc()
 
 # Leitura do código de um arquivo
 arquivo = 'teste.hs'
 with open(arquivo, 'r') as file:
     codigo_teste = file.read()
 
-# Configurar o analisador
-analisador.input(codigo_teste)
+# # Teste de exemplo
+# entrada = codigo_teste
+# resultado = parser.parse(entrada)
+# print("Resultado:", resultado)
 
-# Impressão dos tokens gerados
-for token in analisador:
-    coluna = calcular_coluna(token.lexpos, codigo_teste)
-    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
+
+# Leitura do código de um arquivo
+arquivo = 'teste.hs'
+with open(arquivo, 'r') as file:
+    codigo_teste = file.read()
+
+# Analisa o código e gera a AST
+ast = parser.parse(codigo_teste)
+
+# Exibe a AST gerada
+print("Árvore de Sintaxe Abstrata (AST):")
+print(ast)
+
+# Avalia a expressão
+resultado = ast.avaliar()
+print("Resultado da Expressão:", resultado)

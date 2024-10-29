@@ -6,9 +6,9 @@ _tabversion = '3.10'
 
 _lr_method = 'LALR'
 
-_lr_signature = "ABREBLOCO AND ARROBA ASPAS_DUPLAS ASPAS_SIMPLES BARRA BARRA_INVERTIDA BOOL CASE CHAR CIRCUNFLEXO COMENTARIO CRASE DEFAULT DIFERENTE DIV DOIS_PONTOS DOIS_PONTOS_DUPLO DOLLAR ECOMERCIAL ELSE EQUALS ESTRELA EXCLAMACAO FECHABLOCO FLOAT HASHTAG ID IF IGUAL IN INT INTERROGACAO LCHAVE LCOLCHETE LET LPAREN MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL MINUS MULT NOT NOVA_LINHA OF OR PERCENT PIPE PLUS PONTO PONTO_VIRGULA RCHAVE RCOLCHETE RPAREN SETAS SETAS_DUPLO SETAS_ESQUERDA STRING TABULACAO THEN TIL VARSYM WHEREexpressao : expressao PLUS termo\n                 | expressao MINUS termoexpressao : termotermo : termo MULT fator\n             | termo DIV fatortermo : fatorfator : INTfator : '(' expressao ')' expressao : expressao AND termo\n                 | expressao OR termotermo : NOT fator"
+_lr_signature = 'ABREBLOCO AND ARROBA ASPAS_DUPLAS ASPAS_SIMPLES BARRA BARRA_INVERTIDA BOOL CASE CHAR CIRCUNFLEXO COMENTARIO CRASE DEFAULT DIFERENTE DIV DOIS_PONTOS DOIS_PONTOS_DUPLO DOLLAR ECOMERCIAL ELSE EQUALS ESTRELA EXCLAMACAO FECHABLOCO FLOAT HASHTAG ID IF IGUAL IN INT INTERROGACAO LCHAVE LCOLCHETE LET LPAREN MAIOR MAIOR_IGUAL MENOR MENOR_IGUAL MINUS MULT NOT NOVA_LINHA OF OR PERCENT PIPE PLUS PONTO PONTO_VIRGULA RCHAVE RCOLCHETE RPAREN SETAS SETAS_DUPLO SETAS_ESQUERDA STRING TABULACAO THEN TIL VARSYM WHEREexpressao : expressao PLUS termo\n                 | expressao MINUS termoexpressao : termotermo : termo MULT fator\n             | termo DIV fatortermo : fatorfator : INT\n             | FLOATfator : LPAREN expressao RPARENfator : LCHAVE expressao RCHAVEexpressao : expressao AND termo\n                 | expressao OR termotermo : NOT fator'
     
-_lr_action_items = {'NOT':([0,6,7,8,9,10,],[4,4,4,4,4,4,]),'INT':([0,4,6,7,8,9,10,11,12,],[5,5,5,5,5,5,5,5,5,]),'(':([0,4,6,7,8,9,10,11,12,],[6,6,6,6,6,6,6,6,6,]),'$end':([1,2,3,5,13,15,16,17,18,19,20,21,],[0,-3,-6,-7,-11,-1,-2,-9,-10,-4,-5,-8,]),'PLUS':([1,2,3,5,13,14,15,16,17,18,19,20,21,],[7,-3,-6,-7,-11,7,-1,-2,-9,-10,-4,-5,-8,]),'MINUS':([1,2,3,5,13,14,15,16,17,18,19,20,21,],[8,-3,-6,-7,-11,8,-1,-2,-9,-10,-4,-5,-8,]),'AND':([1,2,3,5,13,14,15,16,17,18,19,20,21,],[9,-3,-6,-7,-11,9,-1,-2,-9,-10,-4,-5,-8,]),'OR':([1,2,3,5,13,14,15,16,17,18,19,20,21,],[10,-3,-6,-7,-11,10,-1,-2,-9,-10,-4,-5,-8,]),')':([2,3,5,13,14,15,16,17,18,19,20,21,],[-3,-6,-7,-11,21,-1,-2,-9,-10,-4,-5,-8,]),'MULT':([2,3,5,13,15,16,17,18,19,20,21,],[11,-6,-7,-11,11,11,11,11,-4,-5,-8,]),'DIV':([2,3,5,13,15,16,17,18,19,20,21,],[12,-6,-7,-11,12,12,12,12,-4,-5,-8,]),}
+_lr_action_items = {'NOT':([0,7,8,9,10,11,12,],[4,4,4,4,4,4,4,]),'INT':([0,4,7,8,9,10,11,12,13,14,],[5,5,5,5,5,5,5,5,5,5,]),'FLOAT':([0,4,7,8,9,10,11,12,13,14,],[6,6,6,6,6,6,6,6,6,6,]),'LPAREN':([0,4,7,8,9,10,11,12,13,14,],[7,7,7,7,7,7,7,7,7,7,]),'LCHAVE':([0,4,7,8,9,10,11,12,13,14,],[8,8,8,8,8,8,8,8,8,8,]),'$end':([1,2,3,5,6,15,18,19,20,21,22,23,24,25,],[0,-3,-6,-7,-8,-13,-1,-2,-11,-12,-4,-5,-9,-10,]),'PLUS':([1,2,3,5,6,15,16,17,18,19,20,21,22,23,24,25,],[9,-3,-6,-7,-8,-13,9,9,-1,-2,-11,-12,-4,-5,-9,-10,]),'MINUS':([1,2,3,5,6,15,16,17,18,19,20,21,22,23,24,25,],[10,-3,-6,-7,-8,-13,10,10,-1,-2,-11,-12,-4,-5,-9,-10,]),'AND':([1,2,3,5,6,15,16,17,18,19,20,21,22,23,24,25,],[11,-3,-6,-7,-8,-13,11,11,-1,-2,-11,-12,-4,-5,-9,-10,]),'OR':([1,2,3,5,6,15,16,17,18,19,20,21,22,23,24,25,],[12,-3,-6,-7,-8,-13,12,12,-1,-2,-11,-12,-4,-5,-9,-10,]),'RPAREN':([2,3,5,6,15,16,18,19,20,21,22,23,24,25,],[-3,-6,-7,-8,-13,24,-1,-2,-11,-12,-4,-5,-9,-10,]),'RCHAVE':([2,3,5,6,15,17,18,19,20,21,22,23,24,25,],[-3,-6,-7,-8,-13,25,-1,-2,-11,-12,-4,-5,-9,-10,]),'MULT':([2,3,5,6,15,18,19,20,21,22,23,24,25,],[13,-6,-7,-8,-13,13,13,13,13,-4,-5,-9,-10,]),'DIV':([2,3,5,6,15,18,19,20,21,22,23,24,25,],[14,-6,-7,-8,-13,14,14,14,14,-4,-5,-9,-10,]),}
 
 _lr_action = {}
 for _k, _v in _lr_action_items.items():
@@ -17,7 +17,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'expressao':([0,6,],[1,14,]),'termo':([0,6,7,8,9,10,],[2,2,15,16,17,18,]),'fator':([0,4,6,7,8,9,10,11,12,],[3,13,3,3,3,3,3,19,20,]),}
+_lr_goto_items = {'expressao':([0,7,8,],[1,16,17,]),'termo':([0,7,8,9,10,11,12,],[2,2,2,18,19,20,21,]),'fator':([0,4,7,8,9,10,11,12,13,14,],[3,15,3,3,3,3,3,3,22,23,]),}
 
 _lr_goto = {}
 for _k, _v in _lr_goto_items.items():
@@ -27,15 +27,17 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> expressao","S'",1,None,None,None),
-  ('expressao -> expressao PLUS termo','expressao',3,'p_expressao_binaria','sintaticHaskell.py',9),
-  ('expressao -> expressao MINUS termo','expressao',3,'p_expressao_binaria','sintaticHaskell.py',10),
-  ('expressao -> termo','expressao',1,'p_expressao_termo','sintaticHaskell.py',17),
-  ('termo -> termo MULT fator','termo',3,'p_termo_binario','sintaticHaskell.py',21),
-  ('termo -> termo DIV fator','termo',3,'p_termo_binario','sintaticHaskell.py',22),
-  ('termo -> fator','termo',1,'p_termo_fator','sintaticHaskell.py',29),
-  ('fator -> INT','fator',1,'p_fator_numero','sintaticHaskell.py',33),
-  ('fator -> ( expressao )','fator',3,'p_fator_parenteses','sintaticHaskell.py',45),
-  ('expressao -> expressao AND termo','expressao',3,'p_expressao_booleana_binaria','sintaticHaskell.py',51),
-  ('expressao -> expressao OR termo','expressao',3,'p_expressao_booleana_binaria','sintaticHaskell.py',52),
-  ('termo -> NOT fator','termo',2,'p_termo_booleana_unario','sintaticHaskell.py',62),
+  ('expressao -> expressao PLUS termo','expressao',3,'p_expressao_binaria','sintaticHaskell.py',48),
+  ('expressao -> expressao MINUS termo','expressao',3,'p_expressao_binaria','sintaticHaskell.py',49),
+  ('expressao -> termo','expressao',1,'p_expressao_termo','sintaticHaskell.py',53),
+  ('termo -> termo MULT fator','termo',3,'p_termo_binario','sintaticHaskell.py',57),
+  ('termo -> termo DIV fator','termo',3,'p_termo_binario','sintaticHaskell.py',58),
+  ('termo -> fator','termo',1,'p_termo_fator','sintaticHaskell.py',62),
+  ('fator -> INT','fator',1,'p_fator_numero','sintaticHaskell.py',66),
+  ('fator -> FLOAT','fator',1,'p_fator_numero','sintaticHaskell.py',67),
+  ('fator -> LPAREN expressao RPAREN','fator',3,'p_fator_parenteses','sintaticHaskell.py',71),
+  ('fator -> LCHAVE expressao RCHAVE','fator',3,'p_fator_chaves','sintaticHaskell.py',75),
+  ('expressao -> expressao AND termo','expressao',3,'p_expressao_booleana_binaria','sintaticHaskell.py',79),
+  ('expressao -> expressao OR termo','expressao',3,'p_expressao_booleana_binaria','sintaticHaskell.py',80),
+  ('termo -> NOT fator','termo',2,'p_termo_booleana_unario','sintaticHaskell.py',84),
 ]

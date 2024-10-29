@@ -39,7 +39,7 @@ reservadas = {
     'then': 'THEN',
     'If': 'IF',
     'Case': 'CASE',
-    'not': 'NAO',
+    'not': 'NOT',
     'of': 'OF',
     'Int': 'INT',
     'Char': 'CHAR',

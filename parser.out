@@ -25,17 +25,14 @@ Unused terminals:
     ESTRELA
     EXCLAMACAO
     FECHABLOCO
-    FLOAT
     HASHTAG
     ID
     IF
     IGUAL
     IN
     INTERROGACAO
-    LCHAVE
     LCOLCHETE
     LET
-    LPAREN
     MAIOR
     MAIOR_IGUAL
     MENOR
@@ -46,9 +43,7 @@ Unused terminals:
     PIPE
     PONTO
     PONTO_VIRGULA
-    RCHAVE
     RCOLCHETE
-    RPAREN
     SETAS
     SETAS_DUPLO
     SETAS_ESQUERDA
@@ -69,17 +64,17 @@ Rule 4     termo -> termo MULT fator
 Rule 5     termo -> termo DIV fator
 Rule 6     termo -> fator
 Rule 7     fator -> INT
-Rule 8     fator -> ( expressao )
-Rule 9     expressao -> expressao AND termo
-Rule 10    expressao -> expressao OR termo
-Rule 11    termo -> NOT fator
+Rule 8     fator -> FLOAT
+Rule 9     fator -> LPAREN expressao RPAREN
+Rule 10    fator -> LCHAVE expressao RCHAVE
+Rule 11    expressao -> expressao AND termo
+Rule 12    expressao -> expressao OR termo
+Rule 13    termo -> NOT fator
 
 Terminals, with rules where they appear
 
-(                    : 8
-)                    : 8
 ABREBLOCO            : 
-AND                  : 9
+AND                  : 11
 ARROBA               : 
 ASPAS_DUPLAS         : 
 ASPAS_SIMPLES        : 
@@ -103,7 +98,7 @@ EQUALS               :
 ESTRELA              : 
 EXCLAMACAO           : 
 FECHABLOCO           : 
-FLOAT                : 
+FLOAT                : 8
 HASHTAG              : 
 ID                   : 
 IF                   : 
@@ -111,28 +106,28 @@ IGUAL                :
 IN                   : 
 INT                  : 7
 INTERROGACAO         : 
-LCHAVE               : 
+LCHAVE               : 10
 LCOLCHETE            : 
 LET                  : 
-LPAREN               : 
+LPAREN               : 9
 MAIOR                : 
 MAIOR_IGUAL          : 
 MENOR                : 
 MENOR_IGUAL          : 
 MINUS                : 2
 MULT                 : 4
-NOT                  : 11
+NOT                  : 13
 NOVA_LINHA           : 
 OF                   : 
-OR                   : 10
+OR                   : 12
 PERCENT              : 
 PIPE                 : 
 PLUS                 : 1
 PONTO                : 
 PONTO_VIRGULA        : 
-RCHAVE               : 
+RCHAVE               : 10
 RCOLCHETE            : 
-RPAREN               : 
+RPAREN               : 9
 SETAS                : 
 SETAS_DUPLO          : 
 SETAS_ESQUERDA       : 
@@ -146,9 +141,9 @@ error                :
 
 Nonterminals, with rules where they appear
 
-expressao            : 1 2 8 9 10 0
-fator                : 4 5 6 11
-termo                : 1 2 3 4 5 9 10
+expressao            : 1 2 9 10 11 12 0
+fator                : 4 5 6 13
+termo                : 1 2 3 4 5 11 12
 
 Parsing method: LALR
 
@@ -158,18 +153,22 @@ state 0
     (1) expressao -> . expressao PLUS termo
     (2) expressao -> . expressao MINUS termo
     (3) expressao -> . termo
-    (9) expressao -> . expressao AND termo
-    (10) expressao -> . expressao OR termo
+    (11) expressao -> . expressao AND termo
+    (12) expressao -> . expressao OR termo
     (4) termo -> . termo MULT fator
     (5) termo -> . termo DIV fator
     (6) termo -> . fator
-    (11) termo -> . NOT fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
     NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
     expressao                      shift and go to state 1
     termo                          shift and go to state 2
@@ -180,13 +179,13 @@ state 1
     (0) S' -> expressao .
     (1) expressao -> expressao . PLUS termo
     (2) expressao -> expressao . MINUS termo
-    (9) expressao -> expressao . AND termo
-    (10) expressao -> expressao . OR termo
+    (11) expressao -> expressao . AND termo
+    (12) expressao -> expressao . OR termo
 
-    PLUS            shift and go to state 7
-    MINUS           shift and go to state 8
-    AND             shift and go to state 9
-    OR              shift and go to state 10
+    PLUS            shift and go to state 9
+    MINUS           shift and go to state 10
+    AND             shift and go to state 11
+    OR              shift and go to state 12
 
 
 state 2
@@ -200,9 +199,10 @@ state 2
     AND             reduce using rule 3 (expressao -> termo .)
     OR              reduce using rule 3 (expressao -> termo .)
     $end            reduce using rule 3 (expressao -> termo .)
-    )               reduce using rule 3 (expressao -> termo .)
-    MULT            shift and go to state 11
-    DIV             shift and go to state 12
+    RPAREN          reduce using rule 3 (expressao -> termo .)
+    RCHAVE          reduce using rule 3 (expressao -> termo .)
+    MULT            shift and go to state 13
+    DIV             shift and go to state 14
 
 
 state 3
@@ -216,19 +216,24 @@ state 3
     AND             reduce using rule 6 (termo -> fator .)
     OR              reduce using rule 6 (termo -> fator .)
     $end            reduce using rule 6 (termo -> fator .)
-    )               reduce using rule 6 (termo -> fator .)
+    RPAREN          reduce using rule 6 (termo -> fator .)
+    RCHAVE          reduce using rule 6 (termo -> fator .)
 
 
 state 4
 
-    (11) termo -> NOT . fator
+    (13) termo -> NOT . fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    fator                          shift and go to state 13
+    fator                          shift and go to state 15
 
 state 5
 
@@ -241,152 +246,239 @@ state 5
     AND             reduce using rule 7 (fator -> INT .)
     OR              reduce using rule 7 (fator -> INT .)
     $end            reduce using rule 7 (fator -> INT .)
-    )               reduce using rule 7 (fator -> INT .)
+    RPAREN          reduce using rule 7 (fator -> INT .)
+    RCHAVE          reduce using rule 7 (fator -> INT .)
 
 
 state 6
 
-    (8) fator -> ( . expressao )
+    (8) fator -> FLOAT .
+
+    MULT            reduce using rule 8 (fator -> FLOAT .)
+    DIV             reduce using rule 8 (fator -> FLOAT .)
+    PLUS            reduce using rule 8 (fator -> FLOAT .)
+    MINUS           reduce using rule 8 (fator -> FLOAT .)
+    AND             reduce using rule 8 (fator -> FLOAT .)
+    OR              reduce using rule 8 (fator -> FLOAT .)
+    $end            reduce using rule 8 (fator -> FLOAT .)
+    RPAREN          reduce using rule 8 (fator -> FLOAT .)
+    RCHAVE          reduce using rule 8 (fator -> FLOAT .)
+
+
+state 7
+
+    (9) fator -> LPAREN . expressao RPAREN
     (1) expressao -> . expressao PLUS termo
     (2) expressao -> . expressao MINUS termo
     (3) expressao -> . termo
-    (9) expressao -> . expressao AND termo
-    (10) expressao -> . expressao OR termo
+    (11) expressao -> . expressao AND termo
+    (12) expressao -> . expressao OR termo
     (4) termo -> . termo MULT fator
     (5) termo -> . termo DIV fator
     (6) termo -> . fator
-    (11) termo -> . NOT fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
     NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    expressao                      shift and go to state 14
+    expressao                      shift and go to state 16
     termo                          shift and go to state 2
     fator                          shift and go to state 3
 
-state 7
+state 8
+
+    (10) fator -> LCHAVE . expressao RCHAVE
+    (1) expressao -> . expressao PLUS termo
+    (2) expressao -> . expressao MINUS termo
+    (3) expressao -> . termo
+    (11) expressao -> . expressao AND termo
+    (12) expressao -> . expressao OR termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (13) termo -> . NOT fator
+    (7) fator -> . INT
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
+
+    NOT             shift and go to state 4
+    INT             shift and go to state 5
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
+
+    expressao                      shift and go to state 17
+    termo                          shift and go to state 2
+    fator                          shift and go to state 3
+
+state 9
 
     (1) expressao -> expressao PLUS . termo
     (4) termo -> . termo MULT fator
     (5) termo -> . termo DIV fator
     (6) termo -> . fator
-    (11) termo -> . NOT fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
     NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    termo                          shift and go to state 15
+    termo                          shift and go to state 18
     fator                          shift and go to state 3
 
-state 8
+state 10
 
     (2) expressao -> expressao MINUS . termo
     (4) termo -> . termo MULT fator
     (5) termo -> . termo DIV fator
     (6) termo -> . fator
-    (11) termo -> . NOT fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
     NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    termo                          shift and go to state 16
-    fator                          shift and go to state 3
-
-state 9
-
-    (9) expressao -> expressao AND . termo
-    (4) termo -> . termo MULT fator
-    (5) termo -> . termo DIV fator
-    (6) termo -> . fator
-    (11) termo -> . NOT fator
-    (7) fator -> . INT
-    (8) fator -> . ( expressao )
-
-    NOT             shift and go to state 4
-    INT             shift and go to state 5
-    (               shift and go to state 6
-
-    termo                          shift and go to state 17
-    fator                          shift and go to state 3
-
-state 10
-
-    (10) expressao -> expressao OR . termo
-    (4) termo -> . termo MULT fator
-    (5) termo -> . termo DIV fator
-    (6) termo -> . fator
-    (11) termo -> . NOT fator
-    (7) fator -> . INT
-    (8) fator -> . ( expressao )
-
-    NOT             shift and go to state 4
-    INT             shift and go to state 5
-    (               shift and go to state 6
-
-    termo                          shift and go to state 18
+    termo                          shift and go to state 19
     fator                          shift and go to state 3
 
 state 11
 
-    (4) termo -> termo MULT . fator
+    (11) expressao -> expressao AND . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
+    NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    fator                          shift and go to state 19
+    termo                          shift and go to state 20
+    fator                          shift and go to state 3
 
 state 12
 
-    (5) termo -> termo DIV . fator
+    (12) expressao -> expressao OR . termo
+    (4) termo -> . termo MULT fator
+    (5) termo -> . termo DIV fator
+    (6) termo -> . fator
+    (13) termo -> . NOT fator
     (7) fator -> . INT
-    (8) fator -> . ( expressao )
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
+    NOT             shift and go to state 4
     INT             shift and go to state 5
-    (               shift and go to state 6
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
-    fator                          shift and go to state 20
+    termo                          shift and go to state 21
+    fator                          shift and go to state 3
 
 state 13
 
-    (11) termo -> NOT fator .
+    (4) termo -> termo MULT . fator
+    (7) fator -> . INT
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
-    MULT            reduce using rule 11 (termo -> NOT fator .)
-    DIV             reduce using rule 11 (termo -> NOT fator .)
-    PLUS            reduce using rule 11 (termo -> NOT fator .)
-    MINUS           reduce using rule 11 (termo -> NOT fator .)
-    AND             reduce using rule 11 (termo -> NOT fator .)
-    OR              reduce using rule 11 (termo -> NOT fator .)
-    $end            reduce using rule 11 (termo -> NOT fator .)
-    )               reduce using rule 11 (termo -> NOT fator .)
+    INT             shift and go to state 5
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
+    fator                          shift and go to state 22
 
 state 14
 
-    (8) fator -> ( expressao . )
-    (1) expressao -> expressao . PLUS termo
-    (2) expressao -> expressao . MINUS termo
-    (9) expressao -> expressao . AND termo
-    (10) expressao -> expressao . OR termo
+    (5) termo -> termo DIV . fator
+    (7) fator -> . INT
+    (8) fator -> . FLOAT
+    (9) fator -> . LPAREN expressao RPAREN
+    (10) fator -> . LCHAVE expressao RCHAVE
 
-    )               shift and go to state 21
-    PLUS            shift and go to state 7
-    MINUS           shift and go to state 8
-    AND             shift and go to state 9
-    OR              shift and go to state 10
+    INT             shift and go to state 5
+    FLOAT           shift and go to state 6
+    LPAREN          shift and go to state 7
+    LCHAVE          shift and go to state 8
 
+    fator                          shift and go to state 23
 
 state 15
+
+    (13) termo -> NOT fator .
+
+    MULT            reduce using rule 13 (termo -> NOT fator .)
+    DIV             reduce using rule 13 (termo -> NOT fator .)
+    PLUS            reduce using rule 13 (termo -> NOT fator .)
+    MINUS           reduce using rule 13 (termo -> NOT fator .)
+    AND             reduce using rule 13 (termo -> NOT fator .)
+    OR              reduce using rule 13 (termo -> NOT fator .)
+    $end            reduce using rule 13 (termo -> NOT fator .)
+    RPAREN          reduce using rule 13 (termo -> NOT fator .)
+    RCHAVE          reduce using rule 13 (termo -> NOT fator .)
+
+
+state 16
+
+    (9) fator -> LPAREN expressao . RPAREN
+    (1) expressao -> expressao . PLUS termo
+    (2) expressao -> expressao . MINUS termo
+    (11) expressao -> expressao . AND termo
+    (12) expressao -> expressao . OR termo
+
+    RPAREN          shift and go to state 24
+    PLUS            shift and go to state 9
+    MINUS           shift and go to state 10
+    AND             shift and go to state 11
+    OR              shift and go to state 12
+
+
+state 17
+
+    (10) fator -> LCHAVE expressao . RCHAVE
+    (1) expressao -> expressao . PLUS termo
+    (2) expressao -> expressao . MINUS termo
+    (11) expressao -> expressao . AND termo
+    (12) expressao -> expressao . OR termo
+
+    RCHAVE          shift and go to state 25
+    PLUS            shift and go to state 9
+    MINUS           shift and go to state 10
+    AND             shift and go to state 11
+    OR              shift and go to state 12
+
+
+state 18
 
     (1) expressao -> expressao PLUS termo .
     (4) termo -> termo . MULT fator
@@ -397,12 +489,13 @@ state 15
     AND             reduce using rule 1 (expressao -> expressao PLUS termo .)
     OR              reduce using rule 1 (expressao -> expressao PLUS termo .)
     $end            reduce using rule 1 (expressao -> expressao PLUS termo .)
-    )               reduce using rule 1 (expressao -> expressao PLUS termo .)
-    MULT            shift and go to state 11
-    DIV             shift and go to state 12
+    RPAREN          reduce using rule 1 (expressao -> expressao PLUS termo .)
+    RCHAVE          reduce using rule 1 (expressao -> expressao PLUS termo .)
+    MULT            shift and go to state 13
+    DIV             shift and go to state 14
 
 
-state 16
+state 19
 
     (2) expressao -> expressao MINUS termo .
     (4) termo -> termo . MULT fator
@@ -413,44 +506,47 @@ state 16
     AND             reduce using rule 2 (expressao -> expressao MINUS termo .)
     OR              reduce using rule 2 (expressao -> expressao MINUS termo .)
     $end            reduce using rule 2 (expressao -> expressao MINUS termo .)
-    )               reduce using rule 2 (expressao -> expressao MINUS termo .)
-    MULT            shift and go to state 11
-    DIV             shift and go to state 12
+    RPAREN          reduce using rule 2 (expressao -> expressao MINUS termo .)
+    RCHAVE          reduce using rule 2 (expressao -> expressao MINUS termo .)
+    MULT            shift and go to state 13
+    DIV             shift and go to state 14
 
 
-state 17
+state 20
 
-    (9) expressao -> expressao AND termo .
+    (11) expressao -> expressao AND termo .
     (4) termo -> termo . MULT fator
     (5) termo -> termo . DIV fator
 
-    PLUS            reduce using rule 9 (expressao -> expressao AND termo .)
-    MINUS           reduce using rule 9 (expressao -> expressao AND termo .)
-    AND             reduce using rule 9 (expressao -> expressao AND termo .)
-    OR              reduce using rule 9 (expressao -> expressao AND termo .)
-    $end            reduce using rule 9 (expressao -> expressao AND termo .)
-    )               reduce using rule 9 (expressao -> expressao AND termo .)
-    MULT            shift and go to state 11
-    DIV             shift and go to state 12
+    PLUS            reduce using rule 11 (expressao -> expressao AND termo .)
+    MINUS           reduce using rule 11 (expressao -> expressao AND termo .)
+    AND             reduce using rule 11 (expressao -> expressao AND termo .)
+    OR              reduce using rule 11 (expressao -> expressao AND termo .)
+    $end            reduce using rule 11 (expressao -> expressao AND termo .)
+    RPAREN          reduce using rule 11 (expressao -> expressao AND termo .)
+    RCHAVE          reduce using rule 11 (expressao -> expressao AND termo .)
+    MULT            shift and go to state 13
+    DIV             shift and go to state 14
 
 
-state 18
+state 21
 
-    (10) expressao -> expressao OR termo .
+    (12) expressao -> expressao OR termo .
     (4) termo -> termo . MULT fator
     (5) termo -> termo . DIV fator
 
-    PLUS            reduce using rule 10 (expressao -> expressao OR termo .)
-    MINUS           reduce using rule 10 (expressao -> expressao OR termo .)
-    AND             reduce using rule 10 (expressao -> expressao OR termo .)
-    OR              reduce using rule 10 (expressao -> expressao OR termo .)
-    $end            reduce using rule 10 (expressao -> expressao OR termo .)
-    )               reduce using rule 10 (expressao -> expressao OR termo .)
-    MULT            shift and go to state 11
-    DIV             shift and go to state 12
+    PLUS            reduce using rule 12 (expressao -> expressao OR termo .)
+    MINUS           reduce using rule 12 (expressao -> expressao OR termo .)
+    AND             reduce using rule 12 (expressao -> expressao OR termo .)
+    OR              reduce using rule 12 (expressao -> expressao OR termo .)
+    $end            reduce using rule 12 (expressao -> expressao OR termo .)
+    RPAREN          reduce using rule 12 (expressao -> expressao OR termo .)
+    RCHAVE          reduce using rule 12 (expressao -> expressao OR termo .)
+    MULT            shift and go to state 13
+    DIV             shift and go to state 14
 
 
-state 19
+state 22
 
     (4) termo -> termo MULT fator .
 
@@ -461,10 +557,11 @@ state 19
     AND             reduce using rule 4 (termo -> termo MULT fator .)
     OR              reduce using rule 4 (termo -> termo MULT fator .)
     $end            reduce using rule 4 (termo -> termo MULT fator .)
-    )               reduce using rule 4 (termo -> termo MULT fator .)
+    RPAREN          reduce using rule 4 (termo -> termo MULT fator .)
+    RCHAVE          reduce using rule 4 (termo -> termo MULT fator .)
 
 
-state 20
+state 23
 
     (5) termo -> termo DIV fator .
 
@@ -475,19 +572,36 @@ state 20
     AND             reduce using rule 5 (termo -> termo DIV fator .)
     OR              reduce using rule 5 (termo -> termo DIV fator .)
     $end            reduce using rule 5 (termo -> termo DIV fator .)
-    )               reduce using rule 5 (termo -> termo DIV fator .)
+    RPAREN          reduce using rule 5 (termo -> termo DIV fator .)
+    RCHAVE          reduce using rule 5 (termo -> termo DIV fator .)
 
 
-state 21
+state 24
 
-    (8) fator -> ( expressao ) .
+    (9) fator -> LPAREN expressao RPAREN .
 
-    MULT            reduce using rule 8 (fator -> ( expressao ) .)
-    DIV             reduce using rule 8 (fator -> ( expressao ) .)
-    PLUS            reduce using rule 8 (fator -> ( expressao ) .)
-    MINUS           reduce using rule 8 (fator -> ( expressao ) .)
-    AND             reduce using rule 8 (fator -> ( expressao ) .)
-    OR              reduce using rule 8 (fator -> ( expressao ) .)
-    $end            reduce using rule 8 (fator -> ( expressao ) .)
-    )               reduce using rule 8 (fator -> ( expressao ) .)
+    MULT            reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    DIV             reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    PLUS            reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    MINUS           reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    AND             reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    OR              reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    $end            reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    RPAREN          reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+    RCHAVE          reduce using rule 9 (fator -> LPAREN expressao RPAREN .)
+
+
+state 25
+
+    (10) fator -> LCHAVE expressao RCHAVE .
+
+    MULT            reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    DIV             reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    PLUS            reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    MINUS           reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    AND             reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    OR              reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    $end            reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    RPAREN          reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
+    RCHAVE          reduce using rule 10 (fator -> LCHAVE expressao RCHAVE .)
 
