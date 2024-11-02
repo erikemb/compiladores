@@ -1,226 +1,231 @@
-import ply.yacc as yacc
-from LEXHaskell import tokens  # Importar os tokens do analisador léxico
+import ply.lex as lex
 
-variaveis = {}
-
-class Node:
-    def __init__(self, tipo, valor=None, filhos=None):
-        self.tipo = tipo
-        self.valor = valor
-        self.filhos = filhos or []
-
-    def __repr__(self, level=0):
-        ret = "\t" * level + repr(self.tipo) + " : " + repr(self.valor) + "\n"
-        for child in self.filhos:
-            ret += child.__repr__(level + 1)
-        return ret
-
-    def avaliar(self):
-    # Verifica o tipo do nó e realiza a operação correspondente
-        
-        
-        if self.tipo == 'Variavel':
-            # Verifica se a variável existe no dicionário `variaveis`
-            return variaveis.get(self.valor, 0)  # Retorna o valor ou 0 se não existir
-        if self.tipo == 'numero':
-            return self.valor
-        if self.tipo == 'id':
-            return self.valor
-        # elif self.tipo == 'Bool':
-        #     return self.valor  # Retorna o valor booleano diretamente
-        elif self.tipo == 'Variavel':
-            return variaveis.get(self.valor, 0)
-        elif self.tipo == 'Operacao':
-            left = self.filhos[0].avaliar()
-            right = self.filhos[1].avaliar()
-            if self.valor == '+':
-                return left + right
-            elif self.valor == '-':
-                return left - right
-            elif self.valor == '*':
-                return left * right
-            elif self.valor == '/':
-                return left / right
-        elif self.tipo == 'OperacaoBooleana':
-            left = self.filhos[0].avaliar()
-            right = self.filhos[1].avaliar()
-            if self.valor == 'and':
-                return left and right
-            elif self.valor == 'or':
-                return left or right
-        elif self.tipo == 'OperacaoUnaria':
-            return not self.filhos[0].avaliar()
-        elif self.tipo == 'OperacaoRelacional':
-            left = self.filhos[0].avaliar()
-            right = self.filhos[1].avaliar()
-            if self.valor == '==':
-                return left == right
-            elif self.valor == '!=':
-                return left != right
-            elif self.valor == '<':
-                return left < right
-            elif self.valor == '>':
-                return left > right
-            elif self.valor == '<=':
-                return left <= right
-            elif self.valor == '>=':
-                return left >= right
-
-        
-
-################################################################################3
-
-# Definição das regras de produção
-
-# Regras da gramática
-def p_expressao_binaria(p):
-    '''expressao : expressao PLUS termo
-                 | expressao MINUS termo'''
-    p[0] = Node(tipo='Operacao', valor=p[2], filhos=[p[1], p[3]])
-
-def p_expressao_termo(p):
-    '''expressao : termo'''
-    p[0] = p[1]
-
-def p_termo_binario(p):
-    '''termo : termo MULT fator
-             | termo DIV fator'''
-    p[0] = Node(tipo='Operacao', valor=p[2], filhos=[p[1], p[3]])
-
-def p_termo_fator(p):
-    '''termo : fator'''
-    p[0] = p[1]
-
-def p_fator_id(p):
-    '''fator : INT
-             | FLOAT
-             | STRING
-             | BOOL
-             | CHAR
-             '''
-    p[0] = Node(tipo='numero', valor=p[1])
+DEBUGLEX = True
+BLOCO = False   # erro de implementação
 
 
-def p_fator_parenteses(p):
-    '''fator : LPAREN expressao RPAREN'''
-    p[0] = p[2]
 
-def p_fator_chaves(p):
-    '''fator : LCHAVE expressao RCHAVE'''
-    p[0] = p[2]
+pilha_indentacao = [0]  # Definição de pilha de indentação
+TAB_TAMANHO = 8  # Defina o tamanho da tabulação como 8 espaços
 
-def p_expressao_booleana_binaria(p):
-    '''expressao : expressao AND termo
-                 | expressao OR termo'''
-    p[0] = Node(tipo='OperacaoBooleana', valor=p[2], filhos=[p[1], p[3]])
 
-def p_termo_booleana_unario(p):
-    '''termo : NOT fator'''
-    p[0] = Node(tipo='OperacaoUnaria', valor='NOT', filhos=[p[2]])
+# Variável global para controlar o início de linha e a detecção do primeiro token
+inicio_linha = True
+primeiro_token_detectado = False
 
-def p_expressao_relacional(p):
-    '''expressao : expressao IGUAL termo
-                 | expressao DIFERENTE termo
-                 | expressao MENOR termo
-                 | expressao MAIOR termo
-                 | expressao MENOR_IGUAL termo
-                 | expressao MAIOR_IGUAL termo'''
-    p[0] = Node(tipo='OperacaoRelacional', valor=p[2], filhos=[p[1], p[3]])
+# Definição dos tokens
+tokens = (
+    'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  
+    'PLUS', 'MINUS', 'MULT', 'DIV',            
+    'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
+    'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE',
+    'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',      
+    'AND', 'OR', 'NOT',                         
+    'TABULACAO', 'NOVA_LINHA', 'ASPAS_SIMPLES', 'ASPAS_DUPLAS', 'BARRA', 'PIPE',
+    'ABREBLOCO', 'FECHABLOCO', 
+    'EXCLAMACAO', 'HASHTAG', 'DOLLAR', 'PERCENT', 'ECOMERCIAL', 
+    'ESTRELA', 'PONTO',
+    'INTERROGACAO', 'ARROBA', 'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
+    'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', "PONTO_VIRGULA","LCOLCHETE","RCOLCHETE","CRASE","LCHAVE","RCHAVE",
+    'SETAS_ESQUERDA', 'SETAS_DUPLO', 'TIPO',
+    
+    'NEWLINE',
+    'VARSYM'
+)
 
-# def p_fator_booleano(p):
-#     '''fator : TRUE
-#              | FALSE'''
-#     # Converta `TRUE` e `FALSE` para valores booleanos em Python
-#     valor = True if p[1] == 'True' else False
-#     p[0] = Node(tipo='Booleano', valor=valor)
+# Palavras reservadas
+reservadas = {
+    'let': 'LET',
+    'else': 'ELSE',
+    'then': 'THEN',
+    'If': 'IF',
+    'Case': 'CASE',
+    'not': 'NOT',
+    'of': 'OF',
+    'Int': 'INT',
+    'Char': 'CHAR',
+    'String': 'STRING',
+    'Float': 'FLOAT',
+    'Bool': 'BOOL',
+    'default': 'DEFAULT',
+    'in': 'IN',
+    'where': 'WHERE',
+    'and' : 'AND',
+    'or':'OR'
+}
 
-def p_declaracao_valor(p):
-    '''
-    declaracao_valor : ID IGUAL valor
-    '''
-    variavel = p[1]
-    valor = p[3]
-    p[0] = ('declaracao_valor', variavel, valor)
+# tokens = ['LPAREN','RPAREN',...,'ID'] + list(reservadas.values())
 
-def p_declaracao_tipo(p):
-    '''
-    declaracao_tipo : ID DOIS_PONTOS_DUPLO TIPO
-    '''
-    variavel = p[1]
-    tipo = p[3]
-    p[0] = ('declaracao_tipo', variavel, tipo)
+# Função para lidar com indentação no início de linhas
+def t_ESPACOS(t):
+    r'[ \t]+'
+    global inicio_linha, primeiro_token_detectado
+    if BLOCO:
+        if inicio_linha:  # Apenas no início da linha
+            nivel_indentacao = 0
+            for char in t.value:
+                if char == '\t':
+                    nivel_indentacao += TAB_TAMANHO
+                else:
+                    nivel_indentacao += 1
 
-def p_tipo(p):
-    '''
-    valor : INT
-          | FLOAT
-          | STRING
-          | BOOL
-          | CHAR
-    '''
-    p[0] = p[1]
+            if primeiro_token_detectado:
+                if nivel_indentacao > pilha_indentacao[-1]:
+                    pilha_indentacao.append(nivel_indentacao)
+                    t.type = 'ABREBLOCO'
+                    return t
+                elif nivel_indentacao < pilha_indentacao[-1]:
+                    pilha_indentacao.pop()
+                    t.type = 'FECHABLOCO'
+                    return t
+            else:
+                primeiro_token_detectado = True
+        t.lexer.lineno += len(t.value.splitlines())
+        inicio_linha = False  # Após processar a indentação, não estamos mais no início da linha
 
-# def p_identificador(p):
-#     '''
-#     identificador : ID
-#     '''
-#     p[0] = p[1]
 
-# def p_id(p):
-#     '''
-#     id : ID
-#     '''
-#     p[0] = Node('Variavel', valor=p[1])
+
+# Definição de tokens para identificadores e palavras-chave
+def t_ID(t):
+    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    t.type = reservadas.get(t.value, 'ID')  # Verifica se é uma palavra reservada
+    return t
+
+
+# Definição de tokens para comentários
+def t_COMENTARIO(t):
+    r'\-\-.*'
+    if DEBUGLEX:
+        print("Comentário:" + t.value)
+    pass  # Ignora o resto da linha
+
+# Definição de tokens para strings (entre aspas duplas)
+def t_STRING(t):
+    r'\"([^\\\n]|(\\.))*?\"'
+    t.value = t.value[1:-1]  # Remove as aspas duplas
+    return t
 
 
 
 
+# Define uma regra para contar saltos de linha
+def t_NEWLINE(t):
+    r'\n+'
+    
+    t.lexer.lineno += len(t.value)
+    global inicio_linha
+    inicio_linha = True  # Sinaliza que estamos no início de uma nova linha
+    # print()
+    
+    return t  # Retorna o token NEWLINE para ser processado
+    
+# Definição de tokens para números de ponto flutuante
+def t_FLOAT(t):
+    r'\d+\.\d+(?=[^\w]|$)'
+    t.value = float(t.value)
+    return t
+
+# Definição de tokens para números inteiros
+def t_INT(t):
+    r'\d+(?=[^\w]|$)'
+    t.value = int(t.value)
+    return t
+
+# Definição de tokens para char
+def t_CHAR(t):
+    r'\'\s*(?:\\.|[^\'\\])\s*\''
+    t.value = t.value[1:-1]  # Remove as aspas simples
+    return t
 
 
 
-erros = 0
-errossintaticos = []
-def p_error(p):
-    if p:
-        print(f"Erro de sintaxe no token {p.type} na linha {p.lineno}")
-        
+# Definição de tokens para operadores e símbolos
+t_PLUS = r'\+'
+t_MINUS = r'-'
+t_MULT = r'\*'
+t_DIV = r'/'
+t_EQUALS = r'='
+t_LPAREN = r'\('
+t_RPAREN = r'\)'
+t_DOIS_PONTOS_DUPLO = r'::'
+t_SETAS = r'->'
+t_EXCLAMACAO = r'\!'     
+t_HASHTAG = r'\#'           
+t_DOLLAR = r'\$'         
+t_PERCENT = r'%'         
+t_ECOMERCIAL = r'\&'     
+t_ESTRELA = r'\⋆'        
+t_PONTO = r'\.'                    
+t_INTERROGACAO = r'\?'   
+t_ARROBA = r'\@'         
+t_BARRA_INVERTIDA = r'\\'  
+t_CIRCUNFLEXO = r'\^'    
+t_TIL = r'\~'            
+t_DOIS_PONTOS = r'\:'    
+t_SETAS_ESQUERDA = r'<-'
+t_SETAS_DUPLO = r'=>'
+t_PONTO_VIRGULA = r';'
+t_LCOLCHETE = r'\['
+t_RCOLCHETE = r'\]'
+t_CRASE = r'`'
+t_LCHAVE = r'\{'
+t_RCHAVE = r'\}'
+
+# Definição de tokens para operadores de comparação
+t_MAIOR = r'>'
+t_MAIOR_IGUAL = r'>='
+t_IGUAL = r'=='
+t_DIFERENTE = r'!='
+t_MENOR_IGUAL = r'<='
+t_MENOR = r'<'
+
+# Definição de tokens para operadores lógicos
+t_AND = r'\&\&'
+t_OR = r'\|\|'
+t_NOT = r'not'
+
+# Definição de tokens para caracteres especiais
+t_TABULACAO = r'\t'
+t_NOVA_LINHA = r'\n'
+
+t_ASPAS_SIMPLES = r'\''  # Correção de aspas simples
+t_ASPAS_DUPLAS = r'\"'
+t_BARRA = r'\\'
+t_PIPE = r'\|'  # Definindo o token PIPE para o símbolo '|'
+
+# Definição de VARSYM (symbol⟨:⟩ {symbol})⟨reservedop | dashes⟩
+# t_VARSYM = r'[!#\$%&⋆\+\./<=>\?@\\\^\|\-~:]+(?:::|==|<=|>=|->|<-|=>|@|~|\\|\||:|=|--|\.\.)'
+
+
+# ARRUMAR O VARSYN PQ TA ZOADO
+
+
+
+
+# Função para tratar erros léxicos
+def t_error(t):
+    print(f"Erro léxico na linha {t.lineno}, caractere '{t.value[0]}'")
+    t.lexer.skip(1)  # Pula o caractere desconhecido
+
+def calcular_coluna(lexpos, codigo):
+    ultima_nova_linha = codigo.rfind('\n', 0, lexpos)
+    if ultima_nova_linha < 0:
+        return lexpos + 1
     else:
-        print("Erro de sintaxe no final do arquivo")
+        return lexpos - ultima_nova_linha
 
-
-##################################
-
-
-
-##################################
-
-# Construa o analisador sintático
-parser = yacc.yacc()
+# Criar o analisador léxico
+analisador = lex.lex()
 
 # Leitura do código de um arquivo
 arquivo = 'teste.hs'
 with open(arquivo, 'r') as file:
     codigo_teste = file.read()
 
-# # Teste de exemplo
-# entrada = codigo_teste
-# resultado = parser.parse(entrada)
-# print("Resultado:", resultado)
+# Configurar o analisador
+analisador.input(codigo_teste)
 
-
-# Leitura do código de um arquivo
-arquivo = 'teste.hs'
-with open(arquivo, 'r') as file:
-    codigo_teste = file.read()
-
-# Analisa o código e gera a AST
-ast = parser.parse(codigo_teste)
-
-# Exibe a AST gerada
-print("Árvore de Sintaxe Abstrata (AST):")
-print(ast)
-
-# Avalia a expressão
-resultado = ast.avaliar()
-print("Resultado da Expressão:", resultado)
-print("quantidade de erros encontrada é :", erros)
+# Impressão dos tokens gerados
+for token in analisador:
+    coluna = calcular_coluna(token.lexpos, codigo_teste)
+    print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
