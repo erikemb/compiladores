@@ -1,8 +1,8 @@
 import ply.lex as lex
 
 DEBUGLEX = True
-BLOCO = True   # erro de implementação
-
+BLOCO = False   # erro de implementação
+TOKENSLEX = False
 
 
 pilha_indentacao = [0]  # Definição de pilha de indentação
@@ -29,6 +29,7 @@ tokens = (
     'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', "PONTO_VIRGULA","LCOLCHETE","RCOLCHETE","CRASE","LCHAVE","RCHAVE",
     'SETAS_ESQUERDA', 'SETAS_DUPLO', 'TIPO',
     
+    'NEWLINE',
     'VARSYM'
 )
 
@@ -53,13 +54,14 @@ reservadas = {
     'or':'OR'
 }
 
+# tokens = ['LPAREN','RPAREN',...,'ID'] + list(reservadas.values())
+
 # Função para lidar com indentação no início de linhas
 def t_ESPACOS(t):
     r'[ \t]+'
-    
     global inicio_linha, primeiro_token_detectado
     if BLOCO:
-        if inicio_linha:  # Só analisa a indentação no início da linha
+        if inicio_linha:  # Apenas no início da linha
             nivel_indentacao = 0
             for char in t.value:
                 if char == '\t':
@@ -68,17 +70,15 @@ def t_ESPACOS(t):
                     nivel_indentacao += 1
 
             if primeiro_token_detectado:
-                # Verifica se a indentação aumentou ou diminuiu
                 if nivel_indentacao > pilha_indentacao[-1]:
                     pilha_indentacao.append(nivel_indentacao)
-                    t.type = 'ABREBLOCO'                    
+                    t.type = 'ABREBLOCO'
                     return t
-                elif nivel_indentacao < pilha_indentacao[-1]:                    
-                        pilha_indentacao.pop()
-                        t.type = 'FECHABLOCO'                        
-                        return t
+                elif nivel_indentacao < pilha_indentacao[-1]:
+                    pilha_indentacao.pop()
+                    t.type = 'FECHABLOCO'
+                    return t
             else:
-                # Ajusta o controle de linha para que a análise de indentação ocorra após o primeiro token
                 primeiro_token_detectado = True
         t.lexer.lineno += len(t.value.splitlines())
         inicio_linha = False  # Após processar a indentação, não estamos mais no início da linha
@@ -107,14 +107,18 @@ def t_STRING(t):
 
 
 
+
 # Define uma regra para contar saltos de linha
-def t_newline(t):
+def t_NEWLINE(t):
     r'\n+'
+    
     t.lexer.lineno += len(t.value)
     global inicio_linha
     inicio_linha = True  # Sinaliza que estamos no início de uma nova linha
-    print()
-
+    # print()
+    
+    return t  # Retorna o token NEWLINE para ser processado
+    
 # Definição de tokens para números de ponto flutuante
 def t_FLOAT(t):
     r'\d+\.\d+(?=[^\w]|$)'
@@ -132,6 +136,8 @@ def t_CHAR(t):
     r'\'\s*(?:\\.|[^\'\\])\s*\''
     t.value = t.value[1:-1]  # Remove as aspas simples
     return t
+
+
 
 # Definição de tokens para operadores e símbolos
 t_PLUS = r'\+'
@@ -181,6 +187,7 @@ t_NOT = r'not'
 # Definição de tokens para caracteres especiais
 t_TABULACAO = r'\t'
 t_NOVA_LINHA = r'\n'
+
 t_ASPAS_SIMPLES = r'\''  # Correção de aspas simples
 t_ASPAS_DUPLAS = r'\"'
 t_BARRA = r'\\'
@@ -218,7 +225,12 @@ with open(arquivo, 'r') as file:
 # Configurar o analisador
 analisador.input(codigo_teste)
 
-# # Impressão dos tokens gerados
-# for token in analisador:
-#     coluna = calcular_coluna(token.lexpos, codigo_teste)
-#     print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
+# Impressão dos tokens gerados
+if (TOKENSLEX == True):
+    for token in analisador:
+        coluna = calcular_coluna(token.lexpos, codigo_teste)
+        if (token.type == 'NEWLINE' ):
+            token.value = 'FIM DE LINHA'
+            print()
+
+        print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
