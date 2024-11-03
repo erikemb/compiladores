@@ -19,3 +19,9 @@
 PARTE 3 
 
 ADD FLOAT NA SEGUNDA PARTE
+
+precedence = (
+    ('left', 'PLUS', 'MINUS'),
+    ('left', 'TIMES', 'DIVIDE'),
+    ('right', 'UMINUS'),            # Unary minus operator
+)

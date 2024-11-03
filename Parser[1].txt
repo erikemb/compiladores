@@ -1,0 +1,316 @@
+import java_cup.runtime.*;
+import java.util.*;
+import java.io.*;
+
+/* Preliminaries to set up and use the scanner.  */
+init with {: scanner.init();              :};
+scan with {: return scanner.next_token(); :};
+
+/* Terminals (tokens returned by the scanner). */
+terminal LCHAVE, RCHAVE, PONTO_VIRGULA, RPAREN, LPAREN;
+terminal RCOLCHETE, LCOLCHETE, VIRGULA, SETAS, DOISPONTOSDUPLO;
+terminal TYPE_CHAR, TYPE_BOOL, TYPE_FLOAT, TYPE_INT, VARID, PLUS, MINUS;
+terminal MULT, CIRCUNFLEXO, MAIOR_IGUAL, MENOR_IGUAL, EQUAL, MAIOR, MENOR, EQUAL_EQUAL;
+terminal DIFER, OR, NOT, WHERE, PIPE, SETAS, LET, BARRA_INVERTIDA, IN, IF;
+terminal THEN, ELSE, CASE, OF, INT_LITERAL, FLOAT_LITERAL, CHAR, STRING, ARROBA;
+terminal UNDERLINE, VARSYM, DOISPONTOS, CRASE, BARRA, AND, UMINUS, TYPE_STRING, TRUE, FALSE;
+
+/* Non-terminals */
+non terminal var, decls, gendecl, funlhs, pat, rhs;
+non terminal vars, type, btype, atype, optionwhere;
+non terminal decl, body, topdecls, topdecl, apat;
+non terminal patop, varop, exp, gdrhs, guards, guard, guardslist, infixexp, lexp, expop;
+non terminal alts, fexp, aexp, gcon, exptuple, explist, quallist;
+non terminal qop, qual, gdpat, lpat, lpattype, qcon, fpatlist;
+non terminal patlist, virgulalist, varsym, qvarop;
+non terminal alt, typetuple, fpat;
+non terminal apatlist, declslist, pattuple;
+
+/* Precedences */
+
+precedence right SETAS;
+precedence left VIRGULA;
+precedence right DOISPONTOS;
+precedence right DOISPONTOSDUPLO;
+precedence left AND;
+precedence left OR;
+precedence nonassoc NOT;
+precedence left MAIOR, MENOR, MAIOR_IGUAL, MENOR_IGUAL, EQUAL_EQUAL, DIFER;
+precedence left PLUS, MINUS;
+precedence left MULT, BARRA;
+precedence right CIRCUNFLEXO;
+precedence left UMINUS;
+precedence left VARSYM, CRASE;
+
+
+
+
+
+
+/* The grammar */
+
+body ::= topdecls ;
+
+topdecls ::=  topdecl PONTO_VIRGULA topdecls
+          |  topdecl
+          ;
+
+topdecl ::=  decl;
+
+decls ::= LCHAVE declslist RCHAVE
+		;
+
+declslist ::= decl PONTO_VIRGULA declslist
+		| decl
+		;
+
+decl ::= gendecl
+  		| funlhs rhs
+		| pat rhs
+		;
+
+gendecl ::= vars DOISPONTOSDUPLO type
+		|
+   		;
+
+vars ::= var
+		| var VIRGULA vars
+		;
+
+
+type ::= btype
+		| btype SETAS type
+		;
+
+btype ::= btype atype
+		| atype
+		;
+
+atype ::= TYPE_INT
+		| TYPE_FLOAT
+		| TYPE_BOOL
+		| TYPE_CHAR
+		| TYPE_STRING
+		| LPAREN type RPAREN
+		| LPAREN typetuple RPAREN
+		| LCOLCHETE type RCOLCHETE
+		;
+
+typetuple ::= type VIRGULA typetuple
+		| type VIRGULA type
+		;
+
+funlhs ::= var apatlist
+		| patop
+		| LPAREN funlhs RPAREN apatlist
+		;
+
+apatlist ::= apat apatlist
+		| apat
+		;
+
+apat ::= var
+		| var ARROBA apat 
+		| qcon LCHAVE fpatlist RCHAVE    
+		| INT_LITERAL
+		| FLOAT_LITERAL
+		| CHAR
+		| STRING
+		| TRUE
+		| FALSE
+		| gcon
+		| UNDERLINE	    
+		| LPAREN pat RPAREN
+		| LPAREN pattuple RPAREN 
+		| LCOLCHETE patlist RCOLCHETE
+		;
+
+fpatlist ::= fpat VIRGULA fpatlist
+		| fpat
+		|
+		;
+
+fpat ::= var EQUAL pat 
+		;
+
+patlist ::= pat VIRGULA patlist
+		| pat
+		;
+
+pattuple ::= pat VIRGULA pattuple
+		| pat VIRGULA pat 
+		;
+
+
+patop ::= pat varop pat
+		| pat PLUS pat
+		| pat MINUS pat
+		| pat MULT pat
+		| pat BARRA pat
+		| pat CIRCUNFLEXO pat
+		| pat MAIOR_IGUAL pat
+		| pat MENOR_IGUAL pat
+		| pat MAIOR pat
+		| pat MENOR pat
+		| pat IGUAL pat
+		| pat DIFERENTE pat
+		| pat OR pat
+		| pat NOT pat
+		| pat AND pat
+		;
+
+pat ::= lpat DOIS_PONTOS pat
+		| lpat
+		;
+
+lpat ::= apat
+		| MINUS lpattype
+		%prec UMINUS    
+		| gcon apatlist
+		;
+   
+
+lpattype ::= INT
+		| FLOAT
+		;
+
+
+
+rhs ::= EQUAL exp WHERE decls
+		| gdrhs WHERE decls
+		;
+
+gdrhs ::= guards EQUAL exp 
+		| guards EQUAL exp gdrhs
+		;
+
+guards ::= PIPE guardslist
+		;
+
+guardslist ::= guard VIRGULA guardslist
+		| guard
+		;
+
+guard ::= pat SETAS infixexp
+		| LET decls
+		| infixexp
+		;
+
+aexp ::= var	    
+		| INT
+		| FLOAT
+		| CHAR
+		| STRING
+		| TRUE
+		| FALSE
+		| LPAREN exptuple RPAREN
+		| LCOLCHETE explist RCOLCHETE
+		| LPAREN exp RPAREN   
+		| LCOLCHETE exp PIPE quallist RCOLCHETE
+		| LPAREN infixexp qop RPAREN
+		| LPAREN qop infixexp RPAREN
+		;	   
+
+exptuple ::= exp VIRGULA exptuple
+		| exp VIRGULA exp
+		;
+
+explist ::= exp VIRGULA explist
+		| exp
+		;
+
+exp ::= infixexp DOISPONTOSDUPLO type
+		| infixexp
+		;
+
+infixexp ::= expop
+		| MINUS infixexp
+		%prec UMINUS
+		| lexp
+		;
+		
+expop ::= infixexp varop infixexp
+		| infixexp PLUS infixexp
+		| infixexp MINUS infixexp
+		| infixexp MULT infixexp
+		| infixexp DIV infixexp
+		| infixexp CIRCUNFLEXO infixexp
+		| infixexp MAIOR_IGUAL infixexp
+		| infixexp MENOR_IGUAL infixexp
+		| infixexp MAIOR infixexp
+		| infixexp MENOR infixexp
+		| infixexp IGUAL infixexp
+		| infixexp DIFERENTE infixexp
+		| infixexp OR infixexp
+		| infixexp NOT infixexp
+		| infixexp AND infixexp
+		;
+
+lexp ::= BARRA_INVERTIDA apatlist SETAS exp
+		| LET decls IN exp
+		| IF exp THEN exp ELSE exp	    
+		| CASE exp OF LCHAVE alts RCHAVE
+		| fexp
+		;
+
+
+fexp ::= aexp aexp
+		| aexp fexp
+		;
+
+quallist ::= qual VIRGULA quallist
+		| qual
+		;
+
+qual ::= pat SETAS exp
+		| LET decls	    
+		| exp	    
+		;
+
+alts ::= alt PONTO_VIRGULA alts
+		| alt
+		;
+
+alt ::= pat SETAS exp optionwhere
+		| pat gdpat optionwhere
+		;
+
+optionwhere ::= WHERE decls
+		| 
+		;
+
+gdpat ::= guards SETAS exp
+		| guards SETAS exp gdpat
+		;
+
+gcon ::= LPAREN RPAREN
+		| LCOLCHETE RCOLCHETE
+		| LPAREN virgulalist RPAREN
+		| qcon
+		;
+
+virgulalist ::= VIRGULA virgulalist
+		| VIRGULA
+		;
+
+var ::= VARID 
+		| LPAREN varsym RPAREN
+		;
+
+qcon ::= LPAREN DOISPONTOS RPAREN
+		;
+
+varop ::= VARSYM 
+		| CRASE VARID CRASE	    
+		;
+
+qvarop ::= VARSYM 
+		| CRASE VARID CRASE
+		;
+
+qop ::= qvarop 
+		| DOISPONTOS
+		;
+
+
+a

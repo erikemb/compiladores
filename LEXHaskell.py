@@ -2,7 +2,7 @@ import ply.lex as lex
 
 DEBUGLEX = True
 BLOCO = False   # erro de implementação
-TOKENSLEX = False
+TOKENSLEX = True
 
 
 pilha_indentacao = [0]  # Definição de pilha de indentação
@@ -17,7 +17,7 @@ primeiro_token_detectado = False
 tokens = (
     'INT', 'FLOAT', 'BOOL', 'CHAR', 'STRING',  
     'PLUS', 'MINUS', 'MULT', 'DIV',            
-    'EQUALS', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
+    'EQUAL', 'LPAREN', 'RPAREN', 'DOIS_PONTOS_DUPLO', 'SETAS', 'COMENTARIO',  
     'ID', 'IF', 'CASE', 'LET', 'ELSE', 'THEN', 'WHERE',
     'MAIOR', 'MAIOR_IGUAL', 'IGUAL', 'DIFERENTE', 'MENOR_IGUAL', 'MENOR',      
     'AND', 'OR', 'NOT',                         
@@ -27,7 +27,7 @@ tokens = (
     'ESTRELA', 'PONTO',
     'INTERROGACAO', 'ARROBA', 'CIRCUNFLEXO', 'TIL', 'DOIS_PONTOS',
     'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', "PONTO_VIRGULA","LCOLCHETE","RCOLCHETE","CRASE","LCHAVE","RCHAVE",
-    'SETAS_ESQUERDA', 'SETAS_DUPLO', 'TIPO',
+    'SETAS_ESQUERDA', 'SETAS_DUPLO', 'TIPO', 'VIRGULA', 'UNDERLINE',
     
     'NEWLINE',
     'VARSYM'
@@ -51,7 +51,9 @@ reservadas = {
     'in': 'IN',
     'where': 'WHERE',
     'and' : 'AND',
-    'or':'OR'
+    'or':'OR',
+    'true' : 'TRUE',
+    'false' : 'FALSE'
 }
 
 # tokens = ['LPAREN','RPAREN',...,'ID'] + list(reservadas.values())
@@ -87,7 +89,7 @@ def t_ESPACOS(t):
 
 # Definição de tokens para identificadores e palavras-chave
 def t_ID(t):
-    r'[a-zA-Z_][a-zA-Z_0-9]*'
+    r'[a-zA-Z][a-zA-Z_0-9]*'
     t.type = reservadas.get(t.value, 'ID')  # Verifica se é uma palavra reservada
     return t
 
@@ -144,7 +146,7 @@ t_PLUS = r'\+'
 t_MINUS = r'-'
 t_MULT = r'\*'
 t_DIV = r'/'
-t_EQUALS = r'='
+t_EQUAL = r'='
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_DOIS_PONTOS_DUPLO = r'::'
@@ -165,11 +167,13 @@ t_DOIS_PONTOS = r'\:'
 t_SETAS_ESQUERDA = r'<-'
 t_SETAS_DUPLO = r'=>'
 t_PONTO_VIRGULA = r';'
+t_VIRGULA = r','
 t_LCOLCHETE = r'\['
 t_RCOLCHETE = r'\]'
 t_CRASE = r'`'
 t_LCHAVE = r'\{'
 t_RCHAVE = r'\}'
+t_UNDERLINE = r'_'
 
 # Definição de tokens para operadores de comparação
 t_MAIOR = r'>'
@@ -230,7 +234,7 @@ if (TOKENSLEX == True):
     for token in analisador:
         coluna = calcular_coluna(token.lexpos, codigo_teste)
         if (token.type == 'NEWLINE' ):
-            token.value = 'FIM DE LINHA'
+            token.value = 'nova linha'
             print()
 
         print(f"Tipo: {token.type}, Valor: {token.value}, Linha: {token.lineno}, Posição: {coluna}")
