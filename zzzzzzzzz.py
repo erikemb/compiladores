@@ -17,8 +17,8 @@ class Node:
         return ret
 
     def avaliar(self):
-        if self.tipo == 'Variavel':
-            return variaveis.get(self.valor, 0)
+        # if self.tipo == 'Variavel':
+        #     return variaveis.get(self.valor, 0)
         if self.tipo == 'numero':
             return self.valor
         elif self.tipo == 'Operacao':
