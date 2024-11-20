@@ -29,6 +29,8 @@ tokens = (
     'DEFAULT', 'OF', 'IN', 'BARRA_INVERTIDA', "PONTO_VIRGULA","LCOLCHETE","RCOLCHETE","CRASE","LCHAVE","RCHAVE",
     'SETAS_ESQUERDA', 'SETAS_DUPLO', 'TIPO', 'VIRGULA', 'UNDERLINE',
     
+    'TRUE', 'FALSE' , 
+    'UMINUS',
     'NEWLINE',
     'VARSYM'
 )
@@ -52,8 +54,7 @@ reservadas = {
     'where': 'WHERE',
     'and' : 'AND',
     'or':'OR',
-    'true' : 'TRUE',
-    'false' : 'FALSE'
+    
 }
 
 # tokens = ['LPAREN','RPAREN',...,'ID'] + list(reservadas.values())
@@ -92,6 +93,12 @@ def t_ID(t):
     r'[a-zA-Z][a-zA-Z_0-9]*'
     t.type = reservadas.get(t.value, 'ID')  # Verifica se é uma palavra reservada
     return t
+
+def t_UMINUS(t): 
+    r'-' 
+    t.type = 'UMINUS' 
+    return t
+
 
 
 # Definição de tokens para comentários
@@ -139,7 +146,10 @@ def t_CHAR(t):
     t.value = t.value[1:-1]  # Remove as aspas simples
     return t
 
+t_VARSYM = r'[a-z][a-zA-Z0-9_]*'
 
+t_TRUE = r'true'
+t_FALSE = r'false'
 
 # Definição de tokens para operadores e símbolos
 t_PLUS = r'\+'
